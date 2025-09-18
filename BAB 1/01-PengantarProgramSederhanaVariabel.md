@@ -209,4 +209,4 @@ Kode tersebut akan menangkap masukan pengguna berupa `string` kemudian nilai ter
 
 Diperlukan _ampersand_ ( `&` ) di depan variabel dengan tipe data integer/floating point. Fungsi `scanf()` yang kita gunakan ini memiliki sebuah kekurangan, yaitu tidak bisa menerima _string_ yang ber-spasi. Namun, kita akan tetap menggunakan metode ini untuk sekarang.
 
-[>> Materi Berikutnya (Algoritma, Pseudocode, dan Source Code)>>](02-AlgoritmaPseudocodeDanSourceCode.md)
+[>> Materi Berikutnya (Algoritma, Pseudocode, dan Source Code)>>](02-AlgoritmaPseudocodeSourcecode.md)
