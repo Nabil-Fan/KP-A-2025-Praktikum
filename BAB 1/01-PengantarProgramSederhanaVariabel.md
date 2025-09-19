@@ -66,8 +66,6 @@ Kode tersebut merupakan baris komentar yang tidak akan dijalankan pada program. 
 
 ## Pengenalan Variabel
 
-Hampir pada semua bahasa pemrograman terdapat sebuah sistem variabel. Variabel adalah suatu tempat yang digunakan untuk menampung data di dalam memori dengan nilai yang berubah-ubah selama program berjalan. Isi dari variabel dapat berubah dari waktu ke waktu sesuai dengan kebutuhan. Hal ini berbeda dengan konsep konstanta yang nilainya akan tetap dan tidak berubah hingga program selesai.
-
 Pada bahasa C terdapat beberapa tipe variabel yang dapat digunakan. Variabel-variabel tersebut dapat dilihat seperti tabel berikut.
 
 ### Tipe Data
@@ -90,14 +88,14 @@ Floating point dapat menyimpan bilangan real seperti `3.14`, `12.345`, `1.0`, da
 Variabel-variabel yang akan digunakan pada program bahasa C harus didefinisikan terlebih dahulu sebelum digunakan. Sebagai contoh, kita ingin mendefinisikan variabel bernama `jumlahApel` dan `jumlahJeruk` dengan nilai 13 dan 21. Karena 13 dan 21 merupakan bilangan bulat, maka kita bisa menggunakan tipe data `int` sehingga penulisannya adalah seperti berikut.
 
 ```c
-int jumlahApel = 13;
-int jumlahJeruk = 21;
+int Apel = 13;
+int Jeruk = 21;
 ```
 
 Selain itu, kita juga bisa mendefinisikan kedua variabel tersebut dengan gaya yang berbeda seperti berikut.
 
 ```c
-int jumlahApel = 13, jumlahJeruk = 21;
+int hApel = 13, jJeruk = 21;
 ```
 
 Selanjutnya, ketika kita ingin membuat sebuah variabel bernama `totalNilai` dengan nilai `3.89`, kita bisa menggunakan tipe data `float` karena nilai tersebut merupakan bilangan real dan penulisannya adalah seperti berikut.
