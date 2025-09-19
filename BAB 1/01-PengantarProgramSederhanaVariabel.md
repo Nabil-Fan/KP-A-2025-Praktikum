@@ -9,7 +9,7 @@ Saat mulai belajar bahasa pemrograman khusus nya bahasa C, Program yang teman te
 int main(){
     printf("Hello World!");
     return 0;
-}
+`
 ```
 
 ### Memahami kode program Hello World
@@ -19,7 +19,7 @@ Mari kita pisahkan dan pahami masing-masing baris dari kode tersebut, dimulai da
 #include <stdio.h>
 ```
 
-Perintah `#include` merupakan sebuah perintah untuk menggunakan sebuah *library* bawaan C yang dinamakan `stdio.h`, yang memiliki banyak fungsi didalamnya, salah satunya adalah `printf`. Baris kode di atas sering disebut *preprocessor directive*. Ingat, tidak seperti baris kode C pada umumnya, *preprocessor directive* tidak memerlukan titik koma (`;`) pada akhir barisnya.
+Perintah `#include` merupakan sebuah perintah untuk menggunakan sebuah *library* bawaan C yang dinamakan `stdio.h`, yang memiliki banyak fungsi didalamnya, salah satunya adalah `printf`
 
 ```c
 int main(){
@@ -29,8 +29,6 @@ int main(){
 
 Selanjutnya, kode di atas adalah fungsi `main()` atau fungsi utama dalam sebuah program C. Fungsi `main` tersebut akan dijalankan pertama kali ketika suatu program C dijalankan. Di belakang fungsi `main` terdapat kata kunci `int` yang menandakan return value dari fungsi tersebut bertipe `int` atau bilangan bulat.
 
-> Catatan:
-> Pembahasan mengenai fungsi dan return value akan dibahas pada pertemuan yang akan datang.
 
 <br />
 
