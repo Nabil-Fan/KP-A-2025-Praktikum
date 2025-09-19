@@ -1,6 +1,6 @@
-# Peraturan Praktikum Dasar Pemrograman 2024
+# Peraturan Praktikum Dasar Pemrograman 2025
 
-- Praktikum dilaksanakan setiap hari  () di 
+- Praktikum dilaksanakan setiap hari Jumat di B4.10 
 - Total pertemuan praktikum: 12 kali 100 menit
 - **ABSEN TIDAK BOLEH DITITIPKAN!**
 - Batas minimal kehadiran: 75% dari total pertemuan
