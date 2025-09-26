@@ -2,8 +2,6 @@
 
 Kondisi SWITCH CASE adalah percabangan kode program dimana kita membandingkan isi sebuah variabel dengan beberapa nilai. Jika proses perbandingan tersebut menghasilkan nilai true, maka block kode program akan dijalankan. Switch case sangat berguna ketika ingin melakukan perbandingan untuk banyak kasus.
 
-Kondisi SWITCH CASE terdiri dari 2 bagian, yakni perintah SWITCH dimana terdapat nama variabel yang akan diperiksa, serta 1 atau lebih perintah CASE, masing-masing untuk setiap nilai yang ingin diperiksa.
-
 Berikut format dasar penulisan kondisi SWITCH CASE dalam bahasa C:
 
 ## Syntax:
@@ -65,7 +63,6 @@ switch (pilihan)
 
     case 2:
         printf("Angka 2\n");
-        break;
 
     case 3:
         printf("Angka 3\n");
