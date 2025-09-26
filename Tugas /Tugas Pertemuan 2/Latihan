@@ -18,3 +18,11 @@ int main() {
 }
 ```
 ## Keluaran 
+```
+        *    
+      * *   
+    * * *   
+  * * * *    
+* * * * *    
+```
+### Buatlah kode program dengan  keluaran yang sama namun menggunakan perintah Do while loop!.
