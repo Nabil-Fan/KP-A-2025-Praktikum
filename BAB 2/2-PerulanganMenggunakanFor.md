@@ -5,11 +5,7 @@
 Setelah sebelumnya telah dijelaskan perulangan menggunakan **while statement** pada [Bab 1.4](https://github.com/rasyidfirmans/PraktikumKP-2024/blob/main/BAB%201/4-PemilihanPerulangan.md), kali ini kita akan menggunakan **for statement**
 
 ## For statement
-For statement adalah suatu statement perulangan/iterasi/loop yang memiliki tiga komponen yaitu inisialisasi, kondisi, dan update. For statement sering digunakan untuk _counter-controlled iteration_
-
-**Apa itu _counter-controlled iteration_?**
-
-_Counter-controlled iteration_ adalah salah satu metode perulangan yang mana perulangan tersebut dikendalikan oleh sebuah pencacah (_counter_) dan memiliki suatu kondisi yang menentukan apakah tetap dilakukan perulangan atau berhenti
+For statement adalah suatu statement perulangan/iterasi/loop yang memiliki tiga komponen yaitu inisialisasi, kondisi, dan update.
 
 ## Syntax
 ```c
@@ -17,7 +13,7 @@ for(/* inisialisasi */ ; /* kondisi */ ; /* update */){
     /* yang akan diulang... */
 }
 ```
-- Inisialisasi: menentukan variabel apa yang akan menjadi pencacah/_counter_ (biasanya variabel bertipe `int` dan bernama `i`,`j`,`k`, dll. Namun, kalian tetap bebas mau pakai tipedata/nama apa saja)
+- Inisialisasi: menentukan variabel apa yang akan menjadi pencacah/_counter_ (biasanya variabel bertipe `int`
 - Kondisi: akan dilakukan perulangan apabila kondisi adalah BENAR atau TRUE dan berhenti apabila kondisi adalah SALAH atau FALSE
 - Update: digunakan untuk meng-update nilai dari pencacah (biasanya berupa increment/decrement). Proses ini akan dieksekusi setelah isi dari `for statement` habis
 
