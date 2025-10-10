@@ -100,10 +100,6 @@ price_list[2] = 2000;
 /* Isi array `price_list` sekarang: {2500, 3100, 2000, 750, 4750} */
 ```
 
-### Catatan
-
-Selalu perhatikan kapasitas dari array jika ingin mengakses atau mengubah nilai elemen suatu array. Pastikan posisi elemennya tidak melebihi kapasitas yang dapat ditampung oleh array. Jika mencoba untuk mengakses posisi di luar batas kapasitas, maka yang terjadi adalah program akan berpotensi crash dan memproduksi error.
-
 ## Variasi Ukuran Array
 
 Dalam pemrograman, seringnya ukuran dari array pasti berubah-ubah seiring dengan jalannya program menyesuaikan dengan penambahan elemen dan penghapusan elemen selama program berjalan.
