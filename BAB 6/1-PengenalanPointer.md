@@ -25,7 +25,6 @@ int main() {
 }
 
 void kurangi_health(int jumlah) {
-    // ERROR: variabel 'health' tidak dikenal di sini
     health = health - jumlah; 
 }
 ```
