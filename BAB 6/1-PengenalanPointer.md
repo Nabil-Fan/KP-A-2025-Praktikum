@@ -63,30 +63,6 @@ health_ptr = &health;      // Pointer menunjuk ke health
 // &health artinya "alamat dari health"
 ```
 
-### Membaca Nilai melalui Pointer
-```c
-int health = 100;
-int *health_ptr = &health;
-
-printf("Health: %d\n", *health_ptr);  // Output: 100
-// *health_ptr artinya "nilai yang ditunjuk oleh health_ptr"
-
-health = 50;  // Ubah nilai asli
-printf("Health: %d\n", *health_ptr);  // Output: 50
-```
-
-### Mengubah Nilai melalui Pointer
-```c
-int health = 100;
-int *health_ptr = &health;
-
-printf("Health awal: %d\n", health);  // Output: 100
-
-*health_ptr = 75;  // Ubah nilai melalui pointer
-
-printf("Health akhir: %d\n", health);  // Output: 75
-```
-
 ## Pointer NULL
 Pointer NULL adalah pointer yang tidak menunjuk ke alamat mana pun.
 
