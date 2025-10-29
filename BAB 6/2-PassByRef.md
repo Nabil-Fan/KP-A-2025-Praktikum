@@ -1,4 +1,4 @@
-[<< Pengenalan Pointer](1-Pengenalan.md)
+[<< Pengenalan Pointer](1-PengenalanPointer.md)
 
 # 6.2 - Pass By Reference
 
