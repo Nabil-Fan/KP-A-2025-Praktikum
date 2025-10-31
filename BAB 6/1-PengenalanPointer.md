@@ -2,7 +2,6 @@
 
 ## Apa itu Pointer
 **Pointer** adalah variabel khusus yang menyimpan **alamat memori** dari variabel lain.  
-Pointer dapat diibaratkan seperti **alamat rumah** — ia tidak berisi barangnya langsung, tetapi tahu di mana barang itu berada.
 
 ## Mengapa Pointer Penting
 Pointer memungkinkan kita **mengubah nilai variabel** dari **luar scope** tempat variabel tersebut dibuat.
