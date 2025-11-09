@@ -1,0 +1,33 @@
+## Deskripsi
+
+Pak Dengklek ingin mencetak seluruh bilangan bulat positif dari n sampai dengan 0 secara menurun setelah itu naik lagi sampai n pada awalnya. Bagaimanakah penyelesaian secara rekursifnya?
+
+## Format Masukan
+
+Baris pertama berisi sebuah bilangan bulat N.
+
+## Format Keluaran
+
+hasil turunan kemudian naikkan dari N, hasil tersebut ditampilkan perbaris.
+
+## Contoh Masukan
+
+```
+5
+```
+
+## Contoh Keluaran
+
+```
+5
+4
+3
+2
+1
+0
+1
+2
+3
+4
+5
+```
