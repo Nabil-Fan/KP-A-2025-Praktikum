@@ -1,10 +1,10 @@
-# 8.1 - Struct dan Union
+# Struct dan Union dalam Bahasa C
 
-## Struct
+## Pendahuluan
 
-### Pengantar
+### Masalah yang Diatasi oleh Struct
 
-Coba perhatikan kode di bawah
+Bayangkan Anda ingin menyimpan data tentang senjata dalam game:
 
 ```c
 char weapon_names[5][50] = {"Desert Eagle", "H&K MP5", "AK-47", "M4A1", "AWP Magnum"};
@@ -13,640 +13,39 @@ int weapon_damages[5] = {35, 15, 25, 20, 100};
 int weapon_rounds[5] = {7, 30, 30, 30, 10};
 ```
 
-**Apa yang dapat anda simpulkan dari kode di atas?** Jadi kode di atas mendeklarasikan dan mendefinisikan 4 variabel bertipe array yang memiliki kesamaan yang umum yaitu: tiap elemennya merepresentasikan deskripsi dari suatu obyek yaitu weapon/senjata, dan memiliki jumlah elemen yang sama yaitu 5.
+**Masalah:**
 
-Array `weapon_names` menyimpan informasi nama-nama tiap senjata, kemudian array `weapon_prices` menyimpan informasi harga tiap senjata, kemudian array `weapon_damages` menyimpan informasi kekuatan tiap senjata, kemudian array `weapon_rounds` menyimpan informasi jumlah peluru (per magazin) tiap senjata. Dengan demikian, dapat ditarik kesimpulan bahwa indeks 0 merupakan milik _Desert Eagle_ (dengan price 750, damage 35, dan rounds 7), indeks 1 merupakan milik _H&K MP5_ (dengan price 1500, damage 15, dan rounds 30), indeks 2 merupakan milik _AK-47_ (dengan price 2500, damage 25, dan rounds 30), dan seterusnya.
+- Data terpisah-pisah dalam array yang berbeda
+- Sulit untuk mengelompokkan data yang berkaitan
+- Jika ingin menambah properti baru, harus membuat array baru
+- Tidak efisien saat passing data ke fungsi
 
-**Permasalahan.** Coba bayangkan ketika anda ingin memasukkan seluruh informasi tentang suatu senjata menuju suatu function melalui argument. Apakah seperti berikut?
+## Apa itu Struct?
 
-```c
-/* (asumsi tidak terdapat global variable terkait array yang telah dibuat tadi) */
-void print_weapon(const char *name, int price, int damage, int rounds) {
-    printf("Weapon name: %s\n", name);
-    printf(" Price: $%d\n", price);
-    printf(" Damage: %d%%\n", damage);
-    printf(" Rounds: %d\n", rounds);
-}
+Struct adalah tipe data yang memungkinkan kita menggabungkan beberapa variabel dengan tipe data yang berbeda dalam satu unit.
 
-int main() {
-    char weapon_names[5][50] = {"Desert Eagle", "H&K MP5", "AK-47", "M4A1", "AWP Magnum"};
-    int weapon_prices[5] = {750, 1500, 2500, 3100, 4750};
-    int weapon_damages[5] = {35, 15, 25, 20, 100};
-    int weapon_rounds[5] = {7, 30, 30, 30, 10};
+### Analogi Sederhana
 
-    /* Print informasi senjata H&K MP5 (indeks: 1) */
-    print_weapon(weapon_names[1], weapon_prices[1], weapon_damages[1], weapon_rounds[1]);
+Jika array seperti laci yang hanya bisa menyimpan benda sejenis, maka struct seperti tas yang bisa menyimpan berbagai macam benda berbeda.
 
-    /* Print informasi senjata M4A1 (indeks: 3) */
-    print_weapon(weapon_names[3], weapon_prices[3], weapon_damages[3], weapon_rounds[3]);
+## Deklarasi dan Definisi Struct
 
-    return 0;
-}
-
-/*
-Output:
-
-Weapon name: H&K MP5
- Price: $1500
- Damage: 15%
- Rounds: 30
-Weapon name: M4A1
- Price: $3100
- Damage: 20%
- Rounds: 30
-*/
-```
-
-Bagian mana yang kurang baik? Dapat dilihat pada parameter fungsi `print_weapon` terdapat 4 variabel yang merepresentasikan suatu obyek yang sama yaitu senjata. Coba bayangkan apabila anda ingin menambahkan informasi lagi untuk obyek senjata (misal: `clips`, `ammo_type`, `manufacturer`, dan lain-lain). Akibatnya adalah parameter fungsi tersebut akan selalu bertambah dan seluruh pemanggilan fungsi juga harus dimodifikasi untuk menyesuaikan jumlah informasi yang terkandung. Tentunya hal seperti itu sangatlah tidak efektif untuk program yang memiliki skala yang besar. Oleh karena itu, hal tersebut dapat diatasi dengan penggunaan **struct**.
-
-**Solusi.** Kode di atas dapat dimodifikasi menjadi:
+### Cara 1: Deklarasi dan Definisi Terpisah
 
 ```c
-/* Definisikan suatu tipe data struct yang merepresentasikan suatu obyek senjata */
-struct Weapon {
-    char name[50];
-    int price;
-    int damage;
-    int rounds;
-};
-
-/* (asumsi tidak terdapat global variable terkait array yang telah dibuat tadi) */
-void print_weapon(const struct Weapon *wpn) {
-    /* Gunakan representasi obyek senjata dengan tipe data pointer `struct Weapon` */
-    /* Akses informasi di dalamnya menggunakan (variable)->(informasi), misal wpn->name */
-    printf("Weapon name: %s\n", wpn->name);
-    printf(" Price: $%d\n", wpn->price);
-    printf(" Damage: %d%%\n", wpn->damage);
-    printf(" Rounds: %d\n", wpn->rounds);
-}
-
-int main() {
-    /* Ubah menjadi satu array yang elemen-elemennya terdiri dari `struct Weapon` */
-    struct Weapon weapon_list[5] = {
-        /* Urutan: name, price, damage, rounds (sesuai urutan pada struct Weapon) */
-        {"Desert Eagle", 750, 35, 7},
-        {"H&K MP5", 1500, 15, 30},
-        {"AK-47", 2500, 25, 30},
-        {"M4A1", 3100, 20, 30},
-        {"AWP Magnum", 4750, 100, 10}
-    };
-
-    /* Print informasi senjata H&K MP5 (indeks: 1) */
-    /* Menggunakan pass-by-reference supaya benar-benar merujuk ke elemen dalam array sehingga tidak ada penyalinan data */
-    print_weapon(&weapon_list[1]);
-
-    /* Print informasi senjata M4A1 (indeks: 3) */
-    /* Menggunakan pass-by-reference supaya benar-benar merujuk ke elemen dalam array sehingga tidak ada penyalinan data */
-    print_weapon(&weapon_list[3]);
-
-    return 0;
-}
-
-/*
-Output:
-
-Weapon name: H&K MP5
- Price: $1500
- Damage: 15%
- Rounds: 30
-Weapon name: M4A1
- Price: $3100
- Damage: 20%
- Rounds: 30
-*/
-```
-
-### Deklarasi Tipe Data Struct
-
-Tipe data suatu struct dapat dideklarasikan dengan format:
-
-```c
-struct /*NamaStruct*/;
-```
-
-Sebagai contoh:
-
-```c
+// Deklarasi struct
 struct Weapon;
-```
 
-Kode di atas mendeklarasikan sebuah struct bernama `Weapon`.
-
-### Definisi Tipe Data Struct
-
-Tipe data suatu struct dapat didefinisikan dengan format:
-
-```c
-struct /*NamaStruct*/ {
-    /* Member variable 1 */;
-    /* Member variable 2 */;
-    /* Member variable 3 */;
-    /* dst... */
-};
-```
-
-Sebagai contoh:
-
-```c
-struct Weapon {
-    char name[50];
-    int price;
-    int damage, rounds;
-};
-```
-
-Member variable (variabel anggota) yang terdapat pada struct Weapon adalah: `name` dengan tipe data **char[50]**, `price` dengan tipe data **int**, `damage` dengan tipe data **int**, dan `rounds` dengan tipe data **int**. Deklarasi suatu member variable mirip dengan deklarasi variabel pada umumnya.
-
-### Deklarasi Variable Bertipe Struct
-
-Suatu variable yang bertipe suatu struct (yang selanjutnya akan disebut sebagai **obyek**) dapat dideklarasikan dengan format:
-
-```c
-struct /*NamaStruct*/ /*NamaVariabel*/;
-```
-
-Sebagai contoh:
-
-```c
-struct Weapon deagle;
-struct Weapon ak47, m4a1;
-```
-
-Kode di atas mendeklarasikan 3 variable atau obyek (`deagle`, `ak47`, dan `m4a1`) yang semuanya bertipe `struct Weapon`.
-
-### Inisialisasi Variable Bertipe Struct
-
-Suatu variable yang bertipe suatu struct dapat diinisialisasi (diisi dengan nilai awal) dengan format:
-
-**Bersamaan dengan deklarasi:**
-
-```c
-struct /*NamaStruct*/ /*NamaVariabel*/ = {/*NilaiMember1*/, /*NilaiMember2*/, /*NilaiMember3*/, /* dst... */};
-```
-
-Sebagai contoh:
-
-```c
-struct Weapon deagle = {"Desert Eagle", 750, 35, 7};
-```
-
-Kode di atas menginisialisasikan obyek `deagle` dengan `name` adalah _Desert Eagle_, `price` adalah 750, `damage` adalah 35, dan `rounds` adalah 7.
-
-**Terpisah dari deklarasi:**
-
-```c
-/* Inisialisasi Obyek.Member1 */;
-/* Inisialisasi Obyek.Member2 */;
-/* Inisialisasi Obyek.Member3 */;
-/* dst... */
-```
-
-Sebagai contoh:
-
-```c
-struct Weapon deagle;
-
-/* Inisialisasi obyek deagle */
-strcpy(deagle.name, "Desert Eagle"); /* Inisialisasi deagle.name (#include <string.h> terlebih dahulu) */
-deagle.price = 750; /* Inisialisasi deagle.price */
-deagle.damage = 35; /* Inisialisasi deagle.damage */
-deagle.rounds = 7; /* Inisialisasi deagle.rounds */
-```
-
-### Operasi Assignment Pada Struct
-
-Suatu obyek atau variable bertipe struct dapat diisi oleh obyek lain dengan tipe struct yang sama menggunakan operasi assignment (=), sebagai contoh:
-
-```c
-struct Weapon m4a1;
-struct Weapon weapon_list[5] = {
-    {"Desert Eagle", 750, 35, 7},
-    {"H&K MP5", 1500, 15, 30},
-    {"AK-47", 2500, 25, 30},
-    {"M4A1", 3100, 20, 30},
-    {"AWP Magnum", 4750, 100, 10}
-};
-
-/* Isi variable `m4a1` dengan elemen keempat (indeks: 3) dari array `weapon_list` */
-m4a1 = weapon_list[3];
-
-print_weapon(&m4a1);
-
-/*
-Output:
-
-Weapon name: M4A1
- Price: $3100
- Damage: 20%
- Rounds: 30
-*/
-```
-
-### Membaca Data Pada Struct
-
-Data yang termuat dalam member variable pada suatu obyek bertipe struct dapat diakses menggunakan tanda titik (.) untuk pembacaan (read)
-
-```c
-struct Weapon deagle = {"Desert Eagle", 750, 35, 7};
-
-/* Membaca variable `deagle` */
-printf("Weapon name: %s\n", deagle.name);
-printf(" Price: $%d\n", deagle.price);
-printf(" Damage: %d%%\n", deagle.damage);
-printf(" Rounds: %d\n", deagle.rounds);
-
-/*
-Output:
-
-Weapon name: Desert Eagle
- Price: $750
- Damage: 35%
- Rounds: 7
-*/
-```
-
-### Menulis Data Pada Struct
-
-Sama seperti pembacaan data, data yang termuat dalam member variable pada suatu obyek bertipe struct dapat diakses menggunakan tanda titik (.) untuk operasi penulisan (write)
-
-```c
-struct Weapon deagle = {"Desert Eagle", 750, 35, 7};
-
-printf("Damage sebelum diupgrade: %d%%\n", deagle.damage);
-
-/* Ubah nilai salah satu member pada `deagle` */
-deagle.damage = 50;
-
-printf("Damage setelah diupgrade: %d%%\n", deagle.damage);
-
-/*
-Output:
-
-Damage sebelum diupgrade: 35%
-Damage setelah diupgrade: 50%
-*/
-```
-
-### Pointer Pada Struct
-
-Dalam prakteknya, umumnya variabel dengan tipe data struct jika dimasukkan sebagai salah satu argumen dalam fungsi adalah dalam bentuk **pointer**. Mengapa? Karena teknik tersebut mencegah terjadinya penyalinan obyek yang mana membuat ruang penyimpanan (memori) tidak efisien. Dengan demikian, kita lebih memilih untuk mengambil referensi (pointer) suatu obyek kemudian mengaksesnya daripada mengambil salinan dari obyek yang sudah ada yang mana membuat memori menjadi lebih boros, apalagi jika ukuran struct besar (terdapat banyak member dengan ukuran yang besar pula). Berikut adalah perbandingannya:
-
-```c
-/* Mengambil referensi (pointer) suatu obyek */
-void print_weapon(const struct Weapon *wpn) {
-    /* Akses member variable menggunakan -> jika pointer */
-    /* Total memori terpakai dalam scope ini: sesuai dengan ukuran pointer `wpn` (4 atau 8 bytes tergantung CPU masing-masing) */
-    printf("Weapon name: %s\n", wpn->name);
-    printf(" Price: $%d\n", wpn->price);
-    printf(" Damage: %d%%\n", wpn->damage);
-    printf(" Rounds: %d\n", wpn->rounds);
-}
-```
-
-```c
-/* Mengambil salinan suatu obyek */
-void print_weapon(struct Weapon wpn) {
-    /* Akses member variable menggunakan . jika bukan pointer */
-    /* Total memori terpakai dalam scope ini: sesuai dengan ukuran `wpn` (sekitar 62 bytes menurut ukuran `struct Weapon`) */
-    printf("Weapon name: %s\n", wpn.name);
-    printf(" Price: $%d\n", wpn.price);
-    printf(" Damage: %d%%\n", wpn.damage);
-    printf(" Rounds: %d\n", wpn.rounds);
-}
-```
-
-**Pass By Reference - Read/Write Access:**
-
-```c
-void upgrade_weapon(struct Weapon *wpn) {
-    /* Pointer `wpn` tidak read-only (const) sehingga nilai yang terkandung di dalamnya dapat dimanipulasi */
-    wpn->damage = wpn->damage + 10; /* Tambah damage sebesar 10 */
-}
-
-int main() {
-    struct Weapon deagle = {"Desert Eagle", 750, 35, 7};
-
-    printf("Damage sebelum diupgrade: %d\n", deagle.damage);
-    upgrade_weapon(&deagle); /* Pass by reference */
-    printf("Damage setelah diupgrade: %d\n", deagle.damage);
-
-    return 0;
-}
-
-/*
-Output:
-
-Damage sebelum diupgrade: 35
-Damage setelah diupgrade: 45
-*/
-```
-
-**Pass By Reference - Read Only Access:**
-
-```c
-void print_weapon(const struct Weapon *wpn) {
-    /* Ingat bahwa `wpn` hanya bisa dibaca saja (read-only) karena pointer bertipe `const` */
-    printf("Weapon name: %s\n", wpn->name);
-    printf(" Price: $%d\n", wpn->price);
-    printf(" Damage: %d%%\n", wpn->damage);
-    printf(" Rounds: %d\n", wpn->rounds);
-}
-
-int main() {
-    struct Weapon deagle = {"Desert Eagle", 750, 35, 7};
-
-    print_weapon(&deagle); /* Pass by reference (read-only) */
-
-    return 0;
-}
-
-/*
-Output:
-
-Weapon name: Desert Eagle
- Price: $750
- Damage: 35%
- Rounds: 7
-*/
-```
-
-**Dynamic Memory Allocation:**
-
-Satu obyek saja:
-
-```c
-struct Weapon *deagle;
-
-deagle = (struct Weapon *)malloc(sizeof(struct Weapon));
-strcpy(deagle->name, "Desert Eagle");
-deagle->price = 750;
-deagle->damage = 35;
-deagle->rounds = 7;
-
-print_weapon(deagle); /* Pass by reference */
-```
-
-Implementasi dalam array (lebih dari satu obyek):
-
-```c
-struct Weapon *weapon_list;
-int weapon_count = 2;
-
-weapon_list = (struct Weapon *)malloc(weapon_count * sizeof(struct Weapon));
-
-strcpy(weapon_list[0].name, "Desert Eagle");
-weapon_list[0].price = 750;
-weapon_list[0].damage = 35;
-weapon_list[0].rounds = 7;
-
-strcpy(weapon_list[1].name, "M4A1");
-weapon_list[1].price = 3100;
-weapon_list[1].damage = 20;
-weapon_list[1].rounds = 30;
-
-print_weapons(weapon_list, weapon_count); /* Masukkan array (otomatis pass by reference) */
-```
-
-### Contoh Source Code
-
-<details>
-<summary>Lihat source code</summary>
-
-```c
-#include <stdio.h>
-#include <stdlib.h>
-
+// Definisi struct
 struct Weapon {
     char name[50];
     int price;
     int damage;
     int rounds;
 };
-
-void print_weapons(const struct Weapon *weapon_list, int weapon_count);
-
-int main() {
-    int i;
-    int weapon_count;
-    struct Weapon *weapon_list;
-
-    printf("Enter number of weapons: ");
-    scanf("%d", &weapon_count);
-
-    weapon_list = (struct Weapon *)malloc(weapon_count * sizeof(struct Weapon));
-    for (i = 0; i < weapon_count; i++) {
-        printf("Weapon #%d name (no spaces): ", i + 1);
-        scanf("%s", weapon_list[i].name);
-
-        printf("Weapon #%d price: ", i + 1);
-        scanf("%d", &weapon_list[i].price);
-
-        printf("Weapon #%d damage: ", i + 1);
-        scanf("%d", &weapon_list[i].damage);
-
-        printf("Weapon #%d rounds: ", i + 1);
-        scanf("%d", &weapon_list[i].rounds);
-    }
-
-    /* Tampilkan semua senjata */
-    print_weapons(weapon_list, weapon_count);
-
-    free(weapon_list);
-
-    return 0;
-}
-
-void print_weapons(const struct Weapon *weapon_list, int weapon_count) {
-    int i;
-
-    printf(" === WEAPONS LIST ===\n");
-    for (i = 0; i < weapon_count; i++) {
-        printf("[%d] %s\n", i + 1, weapon_list[i].name);
-        printf(" Price: $%d\n", weapon_list[i].price);
-        printf(" Damage: %d%%\n", weapon_list[i].damage);
-        printf(" Rounds: %d\n", weapon_list[i].rounds);
-    }
-}
-
-/*
-Output:
-
-Enter number of weapons: 3
-Weapon #1 name (no spaces): Desert_Eagle
-Weapon #1 price: 750
-Weapon #1 damage: 35
-Weapon #1 rounds: 7
-Weapon #2 name (no spaces): H&K_MP5
-Weapon #2 price: 1500
-Weapon #2 damage: 15
-Weapon #2 rounds: 30
-Weapon #3 name (no spaces): M4A1
-Weapon #3 price: 3100
-Weapon #3 damage: 20
-Weapon #3 rounds: 30
- === WEAPONS LIST ===
-[1] Desert_Eagle
- Price: $750
- Damage: 35%
- Rounds: 7
-[2] H&K_MP5
- Price: $1500
- Damage: 15%
- Rounds: 30
-[3] M4A1
- Price: $3100
- Damage: 20%
- Rounds: 30
-*/
 ```
 
-</details>
-
-## Union
-
-Konsep union sebenarnya hampir mirip dengan konsep struct. Hanya saja tiap member variable pada union dipaksa berukuran sama dan mengarah ke alamat memori yang sama semua. Sebagai perbandingan:
-
-```c
-/* Menggunakan struct */
-struct Vector3D {
-    int intComponents[3]; /* Data terletak di alamat memori X berukuran 12 bytes */
-    float floatComponents[3]; /* Data terletak di alamat memori Y berukuran 12 bytes */
-    double doubleComponents[3]; /* Data terletak di alamat memori Z berukuran 24 bytes */
-}; /* Total size: 48 bytes (ukuran intComponents + ukuran floatComponents + ukuran doubleComponents */
-```
-
-```c
-/* Menggunakan union */
-union Vector3D {
-    int intComponents[3]; /* Data terletak di alamat memori X berukuran 24 bytes (sesuai ukuran member terbesar) */
-    float floatComponents[3]; /* Data terletak di alamat memori X berukuran 24 bytes (sesuai ukuran member terbesar) */
-    double doubleComponents[3]; /* Data terletak di alamat memori X berukuran 24 bytes (member terbesar) */
-}; /* Total size: 24 bytes */
-```
-
-Dapat disimpulkan bahwa perubahan nilai salah satu member variable pada variable bertipe union juga mempengaruhi nilai member variable yang lain karena juga berada pada alamat memori yang sama.
-
-Perhatikan kode di bawah untuk mengetahui kinerja union
-
-```c
-union Number {
-    int iVal;
-    long long llVal;
-    float fVal;
-    double dblVal;
-};
-
-int main() {
-    union Number num;
-
-    num.iVal = 32;
-    num.fVal = 64.0f;
-    /* Sekarang 64.0f adalah nilai yang sebenarnya tersimpan dalam `num` */
-    /* `num.iVal` sudah tidak 32 lagi, melainkan sudah tidak bermakna apa-apa */
-
-    /* Tidak menampilkan nilai 32, melainkan representasi bilangan floating point dari 64.0 dalam bentuk integer (FYI bilangan floating point disimpan dalam komputer dalam bentuk unsigned integer) */
-    printf("num.iVal = %d\n", num.iVal);
-
-    /* Menampilkan nilai 64.0 karena operasi assignment terakhir kali adalah `num.fVal = 64.0f;` */
-    printf("num.fVal = %f\n", num.fVal);
-
-    return 0;
-}
-
-/*
-Output:
-
-num.iVal = 1115684864
-num.fVal = 64.000000
-*/
-```
-
-Konsep union sebenarnya hanya ditemukan dalam bahasa C dan termasuk dalam kategori jarang dipakai karena pada bahasa pemrograman populer lain tidak terdapat konsep union. Akan tetapi, tidak salah juga apabila ikut dipelajari sehingga anda dapat menguasai bahasa pemrograman C secara menyeluruh.
-
-### Contoh Source Code
-
-<details>
-<summary>Lihat source code</summary>
-
-```c
-#include <stdio.h>
-
-#define NUM_INT     0
-#define NUM_DOUBLE  1
-
-union NumberValue {
-    int iVal;
-    double dblVal;
-}; /* Ukuran: 8 bytes (ukuran member variable terbesar, `dblVal`) */
-
-struct Number {
-    int type;
-    union NumberValue value; /* Memakan memori 8 bytes saja */
-};
-
-struct Number addTwoNumbers(struct Number a, struct Number b) {
-    struct Number result;
-
-    switch (a.type) {
-    case NUM_INT:
-        result.type = NUM_INT;
-        result.value.iVal = a.value.iVal + b.value.iVal;
-        break;
-    case NUM_DOUBLE:
-        result.type = NUM_DOUBLE;
-        result.value.dblVal = a.value.dblVal + b.value.dblVal;
-        break;
-    }
-
-    return result;
-}
-
-void printNumber(struct Number num) {
-    switch (num.type) {
-    case NUM_INT:
-        printf("Number: %d\n", num.value.iVal);
-        break;
-    case NUM_DOUBLE:
-        printf("Number: %lf\n", num.value.dblVal);
-        break;
-    }
-}
-
-int main() {
-    struct Number num1, num2, result;
-
-    num1.type = NUM_INT;
-    num1.value.iVal = 3;
-    num2.type = NUM_INT;
-    num2.value.iVal = 5;
-    result = addTwoNumbers(num1, num2);
-    printNumber(result);
-
-    num1.type = NUM_DOUBLE;
-    num1.value.dblVal = 10.0;
-    num2.type = NUM_DOUBLE;
-    num2.value.dblVal = 15.0;
-    result = addTwoNumbers(num1, num2);
-    printNumber(result);
-
-    return 0;
-}
-
-/*
-Output:
-
-Number: 8
-Number: 25.000000
-*/
-```
-
-</details>
-
-## Type Aliasing
-
-Untuk mempersingkat penulisan dalam bekerja menggunakan struct dan union, seringkali diterapkan suatu _type aliasing_ menggunakan kata kunci **typedef**. Sebagai contoh:
-
-Versi 1:
+### Cara 2: Deklarasi dan Definisi Sekaligus
 
 ```c
 struct Weapon {
@@ -655,22 +54,9 @@ struct Weapon {
     int damage;
     int rounds;
 };
-
-typedef struct Weapon Weapon;
 ```
 
-Versi 2:
-
-```c
-typedef struct Weapon {
-    char name[50];
-    int price;
-    int damage;
-    int rounds;
-} Weapon;
-```
-
-Versi 3:
+### Cara 3: Dengan typedef (Recommended)
 
 ```c
 typedef struct {
@@ -681,37 +67,438 @@ typedef struct {
 } Weapon;
 ```
 
-Ketika menggunakan type aliasing, kita tidak perlu menuliskan `struct` berulangkali pada source code dalam bekerja menggunakan struct. Dengan demikian, kode berikut sah-sah saja apabila type aliasing di atas diterapkan:
+## Menggunakan Struct
+
+### 1. Deklarasi Variabel Struct
 
 ```c
-/* sudah tidak `const struct Weapon *` lagi */
-void print_weapon(const Weapon *wpn) {
-    printf("Weapon name: %s\n", wpn->name);
-    printf(" Price: $%d\n", wpn->price);
-    printf(" Damage: %d%%\n", wpn->damage);
-    printf(" Rounds: %d\n", wpn->rounds);
+// Dengan struct biasa
+struct Weapon deagle;
+struct Weapon ak47, m4a1;
+
+// Dengan typedef
+Weapon deagle;
+Weapon ak47, m4a1;
+```
+
+### 2. Inisialisasi Struct
+
+```c
+// Cara 1: Inisialisasi langsung
+Weapon deagle = {"Desert Eagle", 750, 35, 7};
+
+// Cara 2: Inisialisasi per member
+Weapon deagle;
+strcpy(deagle.name, "Desert Eagle");
+deagle.price = 750;
+deagle.damage = 35;
+deagle.rounds = 7;
+```
+
+### 3. Array of Struct
+
+```c
+Weapon weapons[5] = {
+    {"Desert Eagle", 750, 35, 7},
+    {"H&K MP5", 1500, 15, 30},
+    {"AK-47", 2500, 25, 30},
+    {"M4A1", 3100, 20, 30},
+    {"AWP Magnum", 4750, 100, 10}
+};
+```
+
+## Mengakses Member Struct
+
+### Menggunakan Operator Titik (.)
+
+```c
+Weapon deagle = {"Desert Eagle", 750, 35, 7};
+
+// Membaca data
+printf("Nama: %s\n", deagle.name);
+printf("Harga: $%d\n", deagle.price);
+
+// Mengubah data
+deagle.damage = 45;
+deagle.price = 800;
+```
+
+## Contoh Program Lengkap
+
+```c
+#include <stdio.h>
+#include <string.h>
+
+typedef struct {
+    char name[50];
+    int price;
+    int damage;
+    int rounds;
+} Weapon;
+
+void printWeapon(Weapon w) {
+    printf("=== STATISTIK SENJATA ===\n");
+    printf("Nama    : %s\n", w.name);
+    printf("Harga   : $%d\n", w.price);
+    printf("Damage  : %d%%\n", w.damage);
+    printf("Peluru  : %d\n", w.rounds);
+    printf("========================\n\n");
 }
 
 int main() {
-    /* sudah tidak `struct Weapon` lagi */
-    Weapon deagle;
-
-    strcpy(deagle.name, "Desert Eagle");
-    deagle.price = 750;
-    deagle.damage = 35;
-    deagle.rounds = 7;
-
-    print_weapon(&deagle);
-
+    Weapon deagle = {"Desert Eagle", 750, 35, 7};
+    Weapon ak47 = {"AK-47", 2500, 25, 30};
+    
+    printWeapon(deagle);
+    printWeapon(ak47);
+    
+    // Upgrade senjata
+    deagle.damage += 10;
+    deagle.price += 100;
+    
+    printf("Setelah upgrade:\n");
+    printWeapon(deagle);
+    
     return 0;
 }
-
-/*
-Output:
-
-Weapon name: Desert Eagle
- Price: $750
- Damage: 35%
- Rounds: 7
-*/
 ```
+
+## Pointer dan Struct
+
+### Mengapa Menggunakan Pointer?
+
+1. Menghemat memori (tidak menyalin seluruh struct)
+2. Bisa memodifikasi data asli
+3. Lebih efisien untuk struct yang besar
+
+### Contoh dengan Pointer
+
+```c
+#include <stdio.h>
+#include <string.h>
+
+typedef struct {
+    char name[50];
+    int price;
+    int damage;
+    int rounds;
+} Weapon;
+
+// Fungsi dengan pointer (lebih efisien)
+void printWeapon(const Weapon *w) {
+    printf("Nama: %s\n", w->name);    // -> untuk pointer
+    printf("Harga: $%d\n", w->price);
+    printf("Damage: %d%%\n", w->damage);
+    printf("Peluru: %d\n", w->rounds);
+}
+
+// Fungsi untuk memodifikasi data
+void upgradeWeapon(Weapon *w, int damageBoost, int priceIncrease) {
+    w->damage += damageBoost;
+    w->price += priceIncrease;
+}
+
+int main() {
+    Weapon deagle = {"Desert Eagle", 750, 35, 7};
+    
+    printf("Sebelum upgrade:\n");
+    printWeapon(&deagle);  // Pass alamat
+    
+    upgradeWeapon(&deagle, 15, 200);
+    
+    printf("\nSetelah upgrade:\n");
+    printWeapon(&deagle);
+    
+    return 0;
+}
+```
+
+## Dynamic Memory Allocation dengan Struct
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct {
+    char name[50];
+    int price;
+    int damage;
+    int rounds;
+} Weapon;
+
+int main() {
+    int jumlahSenjata = 3;
+    Weapon *senjata = malloc(jumlahSenjata * sizeof(Weapon));
+    
+    if (senjata == NULL) {
+        printf("Error: Memori tidak cukup!\n");
+        return 1;
+    }
+    
+    // Isi data
+    strcpy(senjata[0].name, "Desert Eagle");
+    senjata[0].price = 750;
+    senjata[0].damage = 35;
+    senjata[0].rounds = 7;
+    
+    strcpy(senjata[1].name, "AK-47");
+    senjata[1].price = 2500;
+    senjata[1].damage = 25;
+    senjata[1].rounds = 30;
+    
+    strcpy(senjata[2].name, "AWP Magnum");
+    senjata[2].price = 4750;
+    senjata[2].damage = 100;
+    senjata[2].rounds = 10;
+    
+    // Tampilkan data
+    for(int i = 0; i < jumlahSenjata; i++) {
+        printf("Senjata %d: %s ($%d)\n", i+1, senjata[i].name, senjata[i].price);
+    }
+    
+    free(senjata);  // Jangan lupa free memory!
+    return 0;
+}
+```
+
+## Union
+
+### Apa itu Union?
+
+Union mirip dengan struct, tetapi semua member berbagi alamat memori yang sama. Ukuran union ditentukan oleh member terbesar.
+
+### Perbedaan Struct vs Union
+
+```c
+// STRUCT - setiap member punya alamat sendiri
+struct DataStruct {
+    int angka;      // 4 bytes
+    float desimal;  // 4 bytes  
+    char huruf;     // 1 byte
+}; // Total: 9+ bytes (dengan padding)
+
+// UNION - semua member berbagi alamat yang sama
+union DataUnion {
+    int angka;      // 4 bytes
+    float desimal;  // 4 bytes
+    char huruf;     // 1 byte
+}; // Total: 4 bytes (ukuran terbesar)
+```
+
+### Contoh Penggunaan Union
+
+```c
+#include <stdio.h>
+
+typedef union {
+    int angka;
+    float desimal;
+    char huruf;
+} Data;
+
+int main() {
+    Data data;
+    
+    data.angka = 65;
+    printf("Sebagai integer: %d\n", data.angka);
+    printf("Sebagai float: %f\n", data.desimal); // Hasil aneh!
+    printf("Sebagai char: %c\n", data.huruf);    // Karakter 'A'
+    
+    printf("\n");
+    
+    data.desimal = 3.14;
+    printf("Sebagai integer: %d\n", data.angka); // Hasil aneh!
+    printf("Sebagai float: %f\n", data.desimal);
+    printf("Sebagai char: %c\n", data.huruf);    // Hasil aneh!
+    
+    return 0;
+}
+```
+
+### Use Case Union yang Berguna
+
+```c
+#include <stdio.h>
+
+typedef enum { INT, FLOAT, CHAR } DataType;
+
+typedef struct {
+    DataType type;
+    union {
+        int angka;
+        float desimal;
+        char huruf;
+    } value;
+} SmartData;
+
+void printData(SmartData data) {
+    switch(data.type) {
+        case INT:
+            printf("Integer: %d\n", data.value.angka);
+            break;
+        case FLOAT:
+            printf("Float: %.2f\n", data.value.desimal);
+            break;
+        case CHAR:
+            printf("Char: %c\n", data.value.huruf);
+            break;
+    }
+}
+
+int main() {
+    SmartData data1 = {INT, {.angka = 42}};
+    SmartData data2 = {FLOAT, {.desimal = 3.14}};
+    SmartData data3 = {CHAR, {.huruf = 'X'}};
+    
+    printData(data1);
+    printData(data2);
+    printData(data3);
+    
+    return 0;
+}
+```
+
+## Best Practices
+
+### 1. Selalu gunakan typedef
+
+```c
+// Good
+typedef struct {
+    // members
+} Weapon;
+
+// Bad
+struct Weapon {
+    // members
+};
+```
+
+### 2. Gunakan pointer untuk parameter fungsi
+
+```c
+// Good - hemat memori
+void printWeapon(const Weapon *w);
+
+// Bad - boros memori
+void printWeapon(Weapon w);
+```
+
+### 3. Inisialisasi struct dengan hati-hati
+
+```c
+// Good - inisialisasi jelas
+Weapon w = {"Name", 100, 50, 30};
+
+// Bad - tidak terinisialisasi
+Weapon w;
+```
+
+### 4. Gunakan const untuk parameter read-only
+
+```c
+// Good - jelas bahwa fungsi tidak mengubah data
+void printWeapon(const Weapon *w);
+
+// Bad - tidak jelas apakah data diubah
+void printWeapon(Weapon *w);
+```
+
+## Contoh Program Akhir yang Komprehensif
+
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct {
+    char name[50];
+    int price;
+    int damage;
+    int rounds;
+    float accuracy;
+} Weapon;
+
+// Fungsi untuk input senjata
+Weapon inputWeapon() {
+    Weapon w;
+    
+    printf("Masukkan nama senjata: ");
+    scanf("%49s", w.name);
+    
+    printf("Masukkan harga: ");
+    scanf("%d", &w.price);
+    
+    printf("Masukkan damage: ");
+    scanf("%d", &w.damage);
+    
+    printf("Masukkan jumlah peluru: ");
+    scanf("%d", &w.rounds);
+    
+    printf("Masukkan akurasi (0-1): ");
+    scanf("%f", &w.accuracy);
+    
+    return w;
+}
+
+// Fungsi untuk menampilkan senjata
+void printWeapon(const Weapon *w) {
+    printf("\n=== %s ===\n", w->name);
+    printf("Harga    : $%d\n", w->price);
+    printf("Damage   : %d\n", w->damage);
+    printf("Peluru   : %d\n", w->rounds);
+    printf("Akurasi  : %.1f%%\n", w->accuracy * 100);
+}
+
+// Fungsi untuk menampilkan semua senjata
+void printAllWeapons(Weapon weapons[], int count) {
+    printf("\n=== DAFTAR SENJATA ===\n");
+    for(int i = 0; i < count; i++) {
+        printWeapon(&weapons[i]);
+    }
+}
+
+int main() {
+    int jumlah;
+    
+    printf("Berapa banyak senjata yang ingin dimasukkan? ");
+    scanf("%d", &jumlah);
+    
+    Weapon *senjata = malloc(jumlah * sizeof(Weapon));
+    
+    // Input data
+    for(int i = 0; i < jumlah; i++) {
+        printf("\nSenjata ke-%d:\n", i + 1);
+        senjata[i] = inputWeapon();
+    }
+    
+    // Tampilkan semua
+    printAllWeapons(senjata, jumlah);
+    
+    // Cari senjata termahal
+    int maxHarga = 0;
+    int idxTermahal = 0;
+    
+    for(int i = 0; i < jumlah; i++) {
+        if(senjata[i].price > maxHarga) {
+            maxHarga = senjata[i].price;
+            idxTermahal = i;
+        }
+    }
+    
+    printf("\n=== SENJATA TERMAHAL ===\n");
+    printWeapon(&senjata[idxTermahal]);
+    
+    free(senjata);
+    return 0;
+}
+```
+
+## Kesimpulan
+
+- Struct untuk mengelompokkan data yang terkait
+- Union untuk menghemat memori ketika hanya satu member yang digunakan
+- Selalu gunakan pointer ketika passing struct ke fungsi
+- Gunakan typedef untuk membuat kode lebih rapi
+- const untuk parameter yang tidak diubah
