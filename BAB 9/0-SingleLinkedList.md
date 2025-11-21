@@ -1,6 +1,6 @@
 [<< Silabus](../silabus.md)
 
-# 8.1 - Linked List
+# Single Linked List
 
 ## Introduction
 
