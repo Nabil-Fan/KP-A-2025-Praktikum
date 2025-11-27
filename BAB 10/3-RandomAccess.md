@@ -139,47 +139,65 @@ Suatu array (dynamic size) juga dapat dibaca/ditulis dengan mudah dalam file jik
 Penulisan (write):
 
 ```c
-FILE *f;
-int price_list[100];
-int item_count, i;
+#include <stdio.h>
 
-/* ... */
+int main() {
+    FILE *f;
+    int price_list[100];
+    int item_count, i;
 
-printf("Masukkan jumlah barang: ");
-scanf("%d", &item_count);
-for (i = 0; i < item_count; i++) {
-    printf("Harga barang ke-%d: ", (i + 1));
-    scanf("%d", &price_list[i]);
+    f = fopen("harga.bin", "wb");
+    if (f == NULL) {
+        printf("Gagal membuka file!\n");
+        return 0;
+    }
+
+    printf("Masukkan jumlah barang: ");
+    scanf("%d", &item_count);
+
+    for (i = 0; i < item_count; i++) {
+        printf("Harga barang ke-%d: ", i+1);
+        scanf("%d", &price_list[i]);
+    }
+
+    fwrite(&item_count, sizeof(int), 1, f);
+    fwrite(price_list, sizeof(int), item_count, f);
+
+    fclose(f);
+    return 0;
 }
 
-/* ... */
-
-fwrite(&item_count, sizeof(int), 1, f); /* simpan jumlah item juga supaya dapat diketahui secara langsung pada saat pembacaan */
-for (i = 0; i < item_count; i++) {
-    fwrite(&price_list[i], sizeof(int), 1, f);
-}
 ```
 
 Pembacaan (read):
 
 ```c
-FILE *f;
-int price_list[100];
-int item_count, i;
+#include <stdio.h>
 
-/* ... */
+int main() {
+    FILE *f;
+    int price_list[100];
+    int item_count, i;
 
-fread(&item_count, sizeof(int), 1, f); /* baca jumlah item yang tertera pada awal file (blok pertama) */
-for (i = 0; i < item_count; i++) {
-    fread(&price_list[i], sizeof(int), 1, f);
+    f = fopen("harga.bin", "rb");
+    if (f == NULL) {
+        printf("File tidak ditemukan!\n");
+        return 0;
+    }
+
+    fread(&item_count, sizeof(int), 1, f);
+    fread(price_list, sizeof(int), item_count, f);
+
+    fclose(f);
+
+    printf("Jumlah barang: %d\n", item_count);
+    for (i = 0; i < item_count; i++) {
+        printf("Harga barang ke-%d: %d\n", i+1, price_list[i]);
+    }
+
+    return 0;
 }
 
-/* ... */
-
-printf("Jumlah barang: %d\n", item_count);
-for (i = 0; i < item_count; i++) {
-    printf("Harga barang ke-%d: %d\n", (i + 1), price_list[i]);
-}
 ```
 
 ## Baca-Tulis Obyek Bertipe Struct Dalam File
@@ -200,30 +218,85 @@ struct Weapon {
 Penulisan (write):
 
 ```c
-FILE *f;
-struct Weapon deagle;
+#include <stdio.h>
+#include <string.h>
 
-/* ... */
+struct Weapon {
+    char name[50];
+    int price;
+    int damage;
+    int rounds;
+};
 
-strcpy(deagle.name, "Desert Eagle");
-deagle.price = 750;
-deagle.damage = 35;
-deagle.rounds = 7;
+int main() {
+    FILE *f;
+    struct Weapon deagle;
 
-fwrite(&deagle, sizeof(struct Weapon), 1, f);
+    // isi data
+    strcpy(deagle.name, "Desert Eagle");
+    deagle.price = 750;
+    deagle.damage = 35;
+    deagle.rounds = 7;
+
+    // buka file
+    f = fopen("weapon.bin", "wb");
+    if (f == NULL) {
+        printf("Gagal membuka file!\n");
+        return 1;
+    }
+
+    // tulis data struct ke file
+    fwrite(&deagle, sizeof(struct Weapon), 1, f);
+
+    fclose(f);
+
+    printf("Data weapon berhasil disimpan ke weapon.bin\n");
+    return 0;
+}
+
 ```
 
 Pembacaan (read):
 
 ```c
-FILE *f;
-struct Weapon deagle;
+#include <stdio.h>
 
-/* ... */
+struct Weapon {
+    char name[50];
+    int price;
+    int damage;
+    int rounds;
+};
 
-fread(&deagle, sizeof(struct Weapon), 1, f);
+void print_weapon(struct Weapon *w) {
+    printf("Nama Weapon  : %s\n", w->name);
+    printf("Harga        : %d\n", w->price);
+    printf("Damage       : %d\n", w->damage);
+    printf("Rounds/Mag   : %d\n", w->rounds);
+}
 
-print_weapon(&deagle);
+int main() {
+    FILE *f;
+    struct Weapon deagle;
+
+    // buka file
+    f = fopen("weapon.bin", "rb");
+    if (f == NULL) {
+        printf("File weapon.bin tidak ditemukan!\n");
+        return 1;
+    }
+
+    // baca struct dari file
+    fread(&deagle, sizeof(struct Weapon), 1, f);
+
+    fclose(f);
+
+    // tampilkan data
+    print_weapon(&deagle);
+
+    return 0;
+}
+
 ```
 
 ## File Seeking
@@ -243,18 +316,36 @@ Fungsi tersebut mengatur kursor pada file `f` supaya berjarak sebesar `offset` b
 Sebagai contoh:
 
 ```c
-FILE *f;
-int price_list[5] = {750, 1500, 2500, 3100, 4750};
-int new_price = 2000;
+#include <stdio.h>
 
-/* ... */
+int main() {
+    FILE *f;
+    int price_list[5] = {750, 1500, 2500, 3100, 4750};
+    int new_price = 2000;
+    int buffer[5];
+    printf("Data awal:\n");
+    for (int i = 0; i < 5; i++) {
+        printf("%d ", price_list[i]);
+    }
+    printf("\n\n");
+    f = fopen("data.bin", "wb+");
+    if (f == NULL) {
+        printf("File gagal dibuka!\n");
+        return 1;
+    }
+    fwrite(price_list, sizeof(int), 5, f);
+    fseek(f, 1 * sizeof(int), SEEK_SET);
+    fwrite(&new_price, sizeof(int), 1, f);
+    fseek(f, 0, SEEK_SET);
+    fread(buffer, sizeof(int), 5, f);
+    printf("Data setelah diubah:\n");
+    for (int i = 0; i < 5; i++) {
+        printf("%d ", buffer[i]);
+    }
+    printf("\n");
 
-fwrite(price_list, sizeof(int), 5, f);
-fseek(f, 1 * sizeof(int), SEEK_SET); /* Ubah kursor menuju blok ke-2 (berjarak 4 bytes dari awal file) */
-fwrite(&new_price, sizeof(int), 1, f); /* Replace nilai pada blok ke-2 */
+    fclose(f);
+    return 0;
+}
 
-/*
-Tafsiran isi file sebelum seek : 750 | 1500 | 2500 | 3100 | 4750
-Tafsiran isi file setelah seek : 750 | 2000 | 2500 | 3100 | 4750
-*/
 ```
