@@ -1,143 +1,185 @@
-# 9.3 - Random Access
+# 10.3 - Random Access
 
-**Random access** menyimpulkan bahwa file direpresentasikan sebagai kumpulan bytes yang panjangnya dapat diketahui dan bisa digambarkan sebagai kumpulan blok biner dengan tiap blok memiliki ukuran tertentu dan dapat disimpan dalam suatu variabel atau obyek bertipe struct. File berjenis **binary** umumnya dioperasikan secara random access. Dengan demikian, pembahasan seputar topik ini hanya seputar file berjenis binary saja.
+## Apa itu Random Access?
 
-## Operasi Penulisan (Write)
+Random access adalah cara mengakses file dimana kita bisa membaca atau menulis data di posisi mana saja dalam file tanpa harus berurutan. File dianggap sebagai kumpulan bytes yang panjangnya diketahui dan dapat dibagi menjadi blok-blok data.
 
-Dalam menulis ke file berjenis binary, dapat menggunakan fungsi `fwrite` yang terdeklarasi sebagai berikut:
+File binary (biner) biasanya dioperasikan dengan random access. File binary menyimpan data dalam format yang hanya bisa dibaca oleh komputer.
 
+## Keuntungan Random Access
+
+- Ukuran file tetap sama untuk layout data yang sama
+- Akses data lebih cepat karena bisa langsung ke posisi tertentu
+- Cocok untuk menyimpan data terstruktur seperti array dan struct
+
+## Operasi Menulis File Binary
+
+### Menggunakan `fwrite()`
 ```c
-/* Tipe data size_t merupakan type alias dari satu bilangan bulat unsigned */
 size_t fwrite(const void *src, size_t blocksize, size_t n, FILE *f);
 ```
 
-Fungsi tersebut menulis blok yang diambil dari pointer `src` sebanyak `n` yang tiap blok berukuran `size` menuju file `f`. Akan me-return suatu angka yang menyatakan jumlah blok yang berhasil ditulis (jika sukses, nilainya seharusnya sama dengan parameter `n`)
+**Parameter:**
+- `src`: pointer ke data yang akan ditulis
+- `blocksize`: ukuran setiap blok data
+- `n`: jumlah blok yang akan ditulis
+- `f`: pointer ke file
 
-Perhatikan contoh berikut:
-
+**Contoh Program:**
 ```c
-FILE *f;
-char nama[100];
-char prodi[50];
-int angkatan;
+#include <stdio.h>
 
-printf("Masukkan nama : ");
-scanf("%s", nama);
+int main() {
+    FILE *f;
+    char nama[100];
+    char prodi[50];
+    int angkatan;
 
-printf("Masukkan prodi : ");
-scanf("%s", prodi);
+    // Input data dari user
+    printf("Masukkan nama : ");
+    scanf("%s", nama);
+    
+    printf("Masukkan prodi : ");
+    scanf("%s", prodi);
+    
+    printf("Masukkan angkatan : ");
+    scanf("%d", &angkatan);
 
-printf("Masukkan angkatan : ");
-scanf("%d", &angkatan);
-
-printf("Menyimpan ke biodata.bin ...\n");
-f = fopen("biodata.bin", "wb");
-if (f != NULL) {
-    fwrite(nama, 100 * sizeof(char), 1, f);
-    fwrite(prodi, 50 * sizeof(char), 1, f);
-    fwrite(&angkatan, sizeof(int), 1, f);
-    fclose(f);
-    printf("Sukses!\n");
-} else {
-    printf("Tidak dapat menulis ke file biodata.bin\n");
+    // Menulis ke file binary
+    printf("Menyimpan ke biodata.bin ...\n");
+    f = fopen("biodata.bin", "wb");
+    
+    if (f != NULL) {
+        fwrite(nama, 100 * sizeof(char), 1, f);
+        fwrite(prodi, 50 * sizeof(char), 1, f);
+        fwrite(&angkatan, sizeof(int), 1, f);
+        
+        fclose(f);
+        printf("Sukses!\n");
+    } else {
+        printf("Tidak dapat menulis ke file biodata.bin\n");
+    }
+    
+    return 0;
 }
+```
 
-/*
-Output:
-
+**Output:**
+```text
 Masukkan nama : Michael_Raditya
 Masukkan prodi : Informatika
 Masukkan angkatan : 2020
 Menyimpan ke biodata.bin ...
 Sukses!
-*/
 ```
 
-File **biodata.bin** setelahnya berisi tiga blok yang masing-masing merepresentasikan nama, prodi, dan angkatan pada program tersebut dalam bentuk binary dan dapat dibaca lagi dengan cara memasukkan data tiap blok ke variabel yang memiliki tipe (atau ukuran) yang sama.
+**Karakteristik File Binary:**
+- **Tidak bisa dibaca manusia** - Jika dibuka di text editor, tampilannya acak
+- **Ukuran tetap** - File selalu berukuran 154 bytes (100 + 50 + 4 bytes)
+- **Data padding** - String yang pendek tetap memakai ruang penuh
 
-Cobalah untuk membuka file **biodata.bin** menggunakan notepad. Apa yang akan anda lihat? Data menjadi tidak dapat dibaca oleh manusia karena hanya bisa dibaca oleh program yang mengelola data tersebut.
+## Operasi Membaca File Binary
 
-Berapa ukuran file dari **biodata.bin**? Apakah 154 bytes? Kemudian cobalah untuk mengganti data yang anda inputkan pada console dan lihatlah ukuran dari **biodata.bin** lagi. Apakah masih sama? Hal itu dikarenakan tiap blok disimpan dengan ukuran yang tetap (fixed) yang mana blok nama disimpan dengan ukuran 100 bytes tanpa memedulikan seberapa panjang string yang dimasukkan, blok prodi disimpan dengan ukuran 50 bytes dan tanpa memedulikan seberapa panjang string yang dimasukkan juga, dan blok angkatan disimpan dengan ukuran 4 bytes sehingga total adalah 154 bytes. Dengan demikian, perbedaan nilai pada data yang disimpan dalam file yang memiliki layout yang sama selalu menghasilkan ukuran file yang sama juga. Hal ini berbeda dengan sequential access (plaintext) di mana ukuran file bergantung pada representasi suatu variable dalam bentuk string (misal jika jumlah digit suatu angka adalah sebanyak 6 digit, maka angka tersebut membutuhkan ruang 6 bytes pada file plaintext, dan jika panjang suatu string adalah sebanyak 16 karakter, maka string tersebut membutuhkan ruang 16 bytes pada file plaintext) dan dengan demikian file plaintext tidak menjamin kesamaan ukuran file untuk berbagai kemungkinan data.
-
-## Operasi Pembacaan (Read)
-
-Dalam membaca file berjenis binary, dapat menggunakan fungsi `fread` yang terdeklarasi sebagai berikut:
-
+### Menggunakan `fread()`
 ```c
-/* Tipe data size_t merupakan type alias dari satu bilangan bulat unsigned */
 size_t fread(void *dest, size_t blocksize, size_t n, FILE *f);
 ```
 
-Fungsi tersebut membaca blok sebanyak `n` yang tiap blok berukuran `size` dalam file `f` dan kemudian hasilnya disimpan pada pointer `dest`. Akan me-return suatu angka yang menyatakan jumlah blok yang berhasil dibaca (jika sukses, nilainya seharusnya sama dengan parameter `n`)
+**Parameter:**
+- `dest`: pointer tempat menyimpan data yang dibaca
+- `blocksize`: ukuran setiap blok data
+- `n`: jumlah blok yang akan dibaca
+- `f`: pointer ke file
 
-Perhatikan contoh berikut:
-
-Asumsikan **biodata.bin** berisi tiga blok yang masing-masing merepresentasikan nama, prodi, dan angkatan dalam bentuk binary.
-
+**Contoh Program:**
 ```c
-FILE *f;
+#include <stdio.h>
 
-printf("Memuat dari biodata.bin ...\n");
-f = fopen("biodata.bin", "rb");
-if (f != NULL) {
-    char nama[100];
-    char prodi[50];
-    int angkatan;
+int main() {
+    FILE *f;
+    
+    printf("Memuat dari biodata.bin ...\n");
+    f = fopen("biodata.bin", "rb");
+    
+    if (f != NULL) {
+        char nama[100];
+        char prodi[50];
+        int angkatan;
 
-    fread(nama, 100 * sizeof(char), 1, f);
-    fread(prodi, 50 * sizeof(char), 1, f);
-    fread(&angkatan, sizeof(int), 1, f);
-    fclose(f);
+        // Membaca data dari file binary
+        fread(nama, 100 * sizeof(char), 1, f);
+        fread(prodi, 50 * sizeof(char), 1, f);
+        fread(&angkatan, sizeof(int), 1, f);
+        
+        fclose(f);
 
-    printf("Nama : %s\n", nama);
-    printf("Prodi : %s\n", prodi);
-    printf("Angkatan : %d\n", angkatan);
-} else {
-    printf("Tidak dapat memuat file biodata.bin\n");
+        // Menampilkan data
+        printf("Nama : %s\n", nama);
+        printf("Prodi : %s\n", prodi);
+        printf("Angkatan : %d\n", angkatan);
+    } else {
+        printf("Tidak dapat memuat file biodata.bin\n");
+    }
+    
+    return 0;
 }
+```
 
-/*
-Output:
-
+**Output:**
+```text
 Memuat dari biodata.bin ...
 Nama : Michael_Raditya
 Prodi : Informatika
 Angkatan : 2020
-*/
 ```
 
-## Baca-Tulis Array (Fixed Size) Dalam File
+## Menyimpan Array (Ukuran Tetap)
 
-Suatu array (fixed size) dapat dibaca/ditulis dengan mudah dalam file jika menggunakan mode random-access (binary) dengan block size adalah ukuran tiap-tiap elemen array. Perhatikan contoh di bawah
-
-Penulisan (write):
-
+### Menulis Array:
 ```c
-FILE *f;
-int price_list[5] = {750, 1500, 2500, 3100, 4750};
+#include <stdio.h>
 
-/* ... */
+int main() {
+    FILE *f;
+    int price_list[5] = {750, 1500, 2500, 3100, 4750};
 
-fwrite(price_list, sizeof(int), 5, f);
+    f = fopen("prices.bin", "wb");
+    if (f != NULL) {
+        fwrite(price_list, sizeof(int), 5, f);
+        fclose(f);
+        printf("Array berhasil disimpan!\n");
+    }
+    
+    return 0;
+}
 ```
 
-Pembacaan (read):
-
+### Membaca Array:
 ```c
-FILE *f;
-int price_list[5];
+#include <stdio.h>
 
-/* ... */
+int main() {
+    FILE *f;
+    int price_list[5];
 
-fread(price_list, sizeof(int), 5, f);
+    f = fopen("prices.bin", "rb");
+    if (f != NULL) {
+        fread(price_list, sizeof(int), 5, f);
+        fclose(f);
+        
+        printf("Data harga:\n");
+        for (int i = 0; i < 5; i++) {
+            printf("Harga %d: %d\n", i + 1, price_list[i]);
+        }
+    }
+    
+    return 0;
+}
 ```
 
-## Baca-Tulis Array (Dynamic Size) Dalam File
+## Menyimpan Array (Ukuran Dinamis)
 
-Suatu array (dynamic size) juga dapat dibaca/ditulis dengan mudah dalam file jika menggunakan mode random-access (binary) dengan block size adalah ukuran tiap-tiap elemen array. Perhatikan contoh di bawah
-
-Penulisan (write):
-
+### Menulis Array Dinamis:
 ```c
 #include <stdio.h>
 
@@ -149,28 +191,31 @@ int main() {
     f = fopen("harga.bin", "wb");
     if (f == NULL) {
         printf("Gagal membuka file!\n");
-        return 0;
+        return 1;
     }
 
+    // Input jumlah data
     printf("Masukkan jumlah barang: ");
     scanf("%d", &item_count);
 
+    // Input data
     for (i = 0; i < item_count; i++) {
-        printf("Harga barang ke-%d: ", i+1);
+        printf("Harga barang ke-%d: ", i + 1);
         scanf("%d", &price_list[i]);
     }
 
+    // Simpan jumlah data terlebih dahulu
     fwrite(&item_count, sizeof(int), 1, f);
+    // Simpan array
     fwrite(price_list, sizeof(int), item_count, f);
 
     fclose(f);
+    printf("Data berhasil disimpan!\n");
     return 0;
 }
-
 ```
 
-Pembacaan (read):
-
+### Membaca Array Dinamis:
 ```c
 #include <stdio.h>
 
@@ -182,139 +227,39 @@ int main() {
     f = fopen("harga.bin", "rb");
     if (f == NULL) {
         printf("File tidak ditemukan!\n");
-        return 0;
+        return 1;
     }
 
+    // Baca jumlah data terlebih dahulu
     fread(&item_count, sizeof(int), 1, f);
+    // Baca array
     fread(price_list, sizeof(int), item_count, f);
 
     fclose(f);
 
+    // Tampilkan data
     printf("Jumlah barang: %d\n", item_count);
     for (i = 0; i < item_count; i++) {
-        printf("Harga barang ke-%d: %d\n", i+1, price_list[i]);
+        printf("Harga barang ke-%d: %d\n", i + 1, price_list[i]);
     }
 
     return 0;
 }
-
 ```
 
-## Baca-Tulis Obyek Bertipe Struct Dalam File
+## File Seeking dengan `fseek()`
 
-Suatu obyek bertipe struct juga dapat dibaca/tulis dengan mudah dalam file jika menggunakan mode random-access (binary) dengan block size adalah ukuran struct obyek tersebut. Perhatikan contoh di bawah
-
-Asumsikan `struct Weapon` terdefinisi sebagai:
-
-```c
-struct Weapon {
-    char name[50];
-    int price;
-    int damage;
-    int rounds;
-};
-```
-
-Penulisan (write):
-
-```c
-#include <stdio.h>
-#include <string.h>
-
-struct Weapon {
-    char name[50];
-    int price;
-    int damage;
-    int rounds;
-};
-
-int main() {
-    FILE *f;
-    struct Weapon deagle;
-
-    // isi data
-    strcpy(deagle.name, "Desert Eagle");
-    deagle.price = 750;
-    deagle.damage = 35;
-    deagle.rounds = 7;
-
-    // buka file
-    f = fopen("weapon.bin", "wb");
-    if (f == NULL) {
-        printf("Gagal membuka file!\n");
-        return 1;
-    }
-
-    // tulis data struct ke file
-    fwrite(&deagle, sizeof(struct Weapon), 1, f);
-
-    fclose(f);
-
-    printf("Data weapon berhasil disimpan ke weapon.bin\n");
-    return 0;
-}
-
-```
-
-Pembacaan (read):
-
-```c
-#include <stdio.h>
-
-struct Weapon {
-    char name[50];
-    int price;
-    int damage;
-    int rounds;
-};
-
-void print_weapon(struct Weapon *w) {
-    printf("Nama Weapon  : %s\n", w->name);
-    printf("Harga        : %d\n", w->price);
-    printf("Damage       : %d\n", w->damage);
-    printf("Rounds/Mag   : %d\n", w->rounds);
-}
-
-int main() {
-    FILE *f;
-    struct Weapon deagle;
-
-    // buka file
-    f = fopen("weapon.bin", "rb");
-    if (f == NULL) {
-        printf("File weapon.bin tidak ditemukan!\n");
-        return 1;
-    }
-
-    // baca struct dari file
-    fread(&deagle, sizeof(struct Weapon), 1, f);
-
-    fclose(f);
-
-    // tampilkan data
-    print_weapon(&deagle);
-
-    return 0;
-}
-
-```
-
-## File Seeking
-
-Kursor yang merujuk ke lokasi target operasi pembacaan/penulisan berikutnya dalam file random-access (binary) dapat dipindah-pindah menggunakan fungsi **fseek()** pada **stdio.h** dengan deklarasi sebagai berikut:
-
+Fungsi `fseek()` digunakan untuk memindahkan kursor file ke posisi tertentu.
 ```c
 int fseek(FILE *f, long int offset, int origin);
 ```
 
-Fungsi tersebut mengatur kursor pada file `f` supaya berjarak sebesar `offset` bytes relatif terhadap `origin`, dengan `origin` adalah salah satu dari:
+**Parameter `origin`:**
+- `SEEK_SET` - Dari awal file
+- `SEEK_CUR` - Dari posisi sekarang
+- `SEEK_END` - Dari akhir file
 
-- `SEEK_SET` : lokasi kursor pada awal file
-- `SEEK_CUR` : lokasi kursor saat ini
-- `SEEK_END` : lokasi kursor pada akhir file
-
-Sebagai contoh:
-
+**Contoh Penggunaan:**
 ```c
 #include <stdio.h>
 
@@ -323,21 +268,31 @@ int main() {
     int price_list[5] = {750, 1500, 2500, 3100, 4750};
     int new_price = 2000;
     int buffer[5];
+    
     printf("Data awal:\n");
     for (int i = 0; i < 5; i++) {
         printf("%d ", price_list[i]);
     }
     printf("\n\n");
+    
+    // Buka file untuk baca+tulis
     f = fopen("data.bin", "wb+");
     if (f == NULL) {
         printf("File gagal dibuka!\n");
         return 1;
     }
+    
+    // Tulis array ke file
     fwrite(price_list, sizeof(int), 5, f);
+    
+    // Pindah ke elemen ke-2 (indeks 1) dan ubah nilainya
     fseek(f, 1 * sizeof(int), SEEK_SET);
     fwrite(&new_price, sizeof(int), 1, f);
+    
+    // Kembali ke awal dan baca seluruh array
     fseek(f, 0, SEEK_SET);
     fread(buffer, sizeof(int), 5, f);
+    
     printf("Data setelah diubah:\n");
     for (int i = 0; i < 5; i++) {
         printf("%d ", buffer[i]);
@@ -347,5 +302,17 @@ int main() {
     fclose(f);
     return 0;
 }
-
 ```
+
+**Output:**
+```text
+Data awal:
+750 1500 2500 3100 4750 
+
+Data setelah diubah:
+750 2000 2500 3100 4750
+```
+
+---
+
+**Catatan:** Random access sangat berguna untuk aplikasi yang membutuhkan akses data cepat dan efisien, seperti database sederhana atau sistem manajemen file.
