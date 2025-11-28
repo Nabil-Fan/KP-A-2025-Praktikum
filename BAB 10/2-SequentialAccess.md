@@ -1,119 +1,149 @@
 # 10.2 - Sequential Access
 
-**Sequential access** menyimpulkan bahwa file dapat direpresentasikan sebagai kumpulan karakter atau bytes yang panjangnya tidak diketahui. File berjenis **plaintext** umumnya dioperasikan secara sequential access. Dengan demikian, pembahasan seputar topik ini hanya seputar file berjenis plaintext saja.
+## Pengertian Sequential Access
 
-## Operasi Pembacaan (Read)
+Sequential access adalah cara mengakses file dimana data dibaca atau ditulis secara berurutan dari awal hingga akhir. File dianggap sebagai kumpulan karakter/bytes yang panjangnya tidak diketahui di awal.
 
-Dalam membaca file berjenis plaintext, dapat menggunakan beberapa fungsi pada header **stdio.h** seperti: `fscanf`, `fgetc`, dan `fgets`. Cara penggunaan tiap-tiap fungsi tersebut dapat dilihat [di sini](https://cplusplus.com/reference/cstdio/).
+File plaintext (teks biasa) biasanya dioperasikan dengan sequential access. Materi ini akan fokus pada operasi file plaintext.
 
-Namun dalam kali ini kita akan membahas yang `fscanf` saja. Pada dasarnya, `fscanf` memiliki kinerja yang hampir mirip dengan fungsi `scanf`. Perhatikan contoh berikut:
+## Operasi Membaca File
 
-Isi file **biodata.txt** sebelumnya:
-```
+Untuk membaca file plaintext, kita bisa menggunakan beberapa fungsi dari header `stdio.h`:
+
+### Menggunakan `fscanf()`
+
+Fungsi `fscanf()` bekerja mirip dengan `scanf()`, tetapi membaca dari file.
+
+**Contoh:** File `biodata.txt` berisi:
+```text
 Michael_Raditya
 Informatika
 2020
 ```
 
+**Kode Program:**
 ```c
-FILE *f;
+#include <stdio.h>
 
-printf("Memuat dari biodata.txt ...");
-f = fopen("biodata.txt", "r");
-if (f != NULL) {
-    char nama[100];
-    char prodi[50];
-    int angkatan;
+int main() {
+    FILE *f;
+    
+    printf("Memuat dari biodata.txt ...\n");
+    f = fopen("biodata.txt", "r");
+    
+    if (f != NULL) {
+        char nama[100];
+        char prodi[50];
+        int angkatan;
 
-    fscanf(f, "%s", nama);
-    fscanf(f, "%s", prodi);
-    fscanf(f, "%d", &angkatan);
+        // Membaca data dari file
+        fscanf(f, "%s", nama);
+        fscanf(f, "%s", prodi);
+        fscanf(f, "%d", &angkatan);
 
-    printf("Nama : %s\n", nama);
-    printf("Prodi : %s\n", prodi);
-    printf("Angkatan : %d\n", angkatan);
+        // Menampilkan data
+        printf("Nama : %s\n", nama);
+        printf("Prodi : %s\n", prodi);
+        printf("Angkatan : %d\n", angkatan);
 
-    fclose(f);
-} else {
-    printf("Tidak dapat membaca file biodata.txt"\n);
+        fclose(f);
+    } else {
+        printf("Tidak dapat membaca file biodata.txt\n");
+    }
+    
+    return 0;
 }
+```
 
-/*
-Output:
-
+**Output:**
+```text
 Memuat dari biodata.txt ...
 Nama : Michael_Raditya
 Prodi : Informatika
 Angkatan : 2020
-*/
 ```
 
-## Operasi Penulisan (Write)
+## Operasi Menulis File
 
-Dalam menulis file berjenis plaintext, dapat menggunakan beberapa fungsi pada header **stdio.h** seperti: `fprintf`, `fputc`, dan `fputs`. Cara penggunaan tiap-tiap fungsi tersebut dapat diliht [di sini](https://cplusplus.com/reference/cstdio/)
+Untuk menulis file plaintext, kita bisa menggunakan beberapa fungsi dari `stdio.h`:
 
+### Menggunakan `fprintf()`
+
+Fungsi `fprintf()` bekerja mirip dengan `printf()`, tetapi menulis ke file.
+
+**Kode Program:**
 ```c
-FILE *f;
-char nama[100];
-char prodi[50];
-int angkatan;
+#include <stdio.h>
 
-printf("Masukkan nama : ");
-scanf("%s", nama);
+int main() {
+    FILE *f;
+    char nama[100];
+    char prodi[50];
+    int angkatan;
 
-printf("Masukkan prodi : ");
-scanf("%s", prodi);
+    // Input dari user
+    printf("Masukkan nama : ");
+    scanf("%s", nama);
+    
+    printf("Masukkan prodi : ");
+    scanf("%s", prodi);
+    
+    printf("Masukkan angkatan : ");
+    scanf("%d", &angkatan);
 
-printf("Masukkan angkatan : ");
-scanf("%d", &angkatan);
-
-printf("Menyimpan ke biodata.txt ...\n");
-f = fopen("biodata.txt", "w");
-if (f != NULL) {
-    fprintf(f, "%s\n", nama);
-    fprintf(f, "%s\n", prodi);
-    fprintf(f, "%d\n", angkatan);
-    fclose(f);
-    printf("Sukses!\n");
-} else {
-    printf("Tidak dapat menulis ke file biodata.txt");
+    // Menulis ke file
+    printf("Menyimpan ke biodata.txt ...\n");
+    f = fopen("biodata.txt", "w");
+    
+    if (f != NULL) {
+        fprintf(f, "%s\n", nama);
+        fprintf(f, "%s\n", prodi);
+        fprintf(f, "%d\n", angkatan);
+        
+        fclose(f);
+        printf("Sukses!\n");
+    } else {
+        printf("Tidak dapat menulis ke file biodata.txt\n");
+    }
+    
+    return 0;
 }
+```
 
-/*
-Output:
-
+**Contoh Output Program:**
+```text
 Masukkan nama : Adriel_Alfeus
 Masukkan prodi : Informatika
 Masukkan angkatan : 2020
 Menyimpan ke biodata.txt ...
 Sukses!
-*/
 ```
 
-Isi file **biodata.txt** setelahnya:
-```
+**Isi file `biodata.txt` setelah dijalankan:**
+```text
 Adriel_Alfeus
 Informatika
 2020
 ```
 
-## Rewind
+## Fungsi Rewind
 
-Kursor yang merujuk ke lokasi target operasi pembacaan/penulisan berikutnya dalam file sequential-access (plaintext) dapat direset menggunakan fungsi **rewind()** pada **stdio.h** dengan deklarasi sebagai berikut:
+Fungsi `rewind()` digunakan untuk mengembalikan kursor file ke posisi awal.
+
+**Deklarasi:**
 ```c
 void rewind(FILE *f);
 ```
-Fungsi tersebut mengatur kursor pada file `f` supaya dikembalikan ke lokasi kursor pada awal file.
 
-Namun patut diperhatikan bahwa operasi penulisan setelah dilakukan rewind dapat merusak representasi data yang ada di dalam file. Oleh karena itu, gunakanlah saja dengan berhati-hati apabila akan melibatkan penulisan ke dalam file lagi.
-
-Sebagai contoh:
+**Contoh Penggunaan:**
 ```c
 FILE *f;
 
-/* ... */
-
 fprintf(f, "Lorem ipsum dolor\n");
-rewind(f);
+rewind(f);  // Kursor kembali ke awal file
 fprintf(f, "sit amet\n");
 ```
+
+---
+
+**Catatan:** Pastikan selalu menutup file dengan `fclose()` setelah selesai menggunakannya untuk menghindari kebocoran memori dan memastikan data tersimpan dengan benar.
