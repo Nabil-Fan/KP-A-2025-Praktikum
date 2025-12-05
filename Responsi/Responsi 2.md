@@ -1,7 +1,7 @@
 # RESPONSI 2 - PRAKTIKUM KONSEP PEMROGRAMAN 2025
 
 - Pengerjaan : Kelompok atau Individu maksimal 2 orang
-- Durasi : 1 minggu (12 Desember 2025; 23.59 WIB)
+- Durasi : 10 hari (15 Desember 2025; 23.59 WIB)
 
 Buatlah sebuah program (skala menengah) menggunakan bahasa C yang menerapkan materi-materi yang telah diajarkan pada praktikum sebagai berikut:
 
