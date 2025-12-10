@@ -38,7 +38,7 @@ SISWA
 TRANSAKSI_PEMBAYARAN
 ```
 
-**Status:** ✅ BERHASIL - Semua 14 tabel berhasil dibuat
+**Status:**   BERHASIL - Semua 14 tabel berhasil dibuat
 
 ### 5.1.2 Pengujian Constraint
 **Tujuan:** Memastikan constraint bekerja dengan baik
@@ -55,7 +55,7 @@ VALUES ('Test Siswa', 'Laki-laki', 'test@test.com', 'Invalid');
 Msg 547, Level 16, State 0
 The INSERT statement conflicted with the CHECK constraint "CK_Siswa_Status"
 ```
-**Status:** ✅ BERHASIL - Constraint menolak nilai yang tidak sesuai
+**Status:**   BERHASIL - Constraint menolak nilai yang tidak sesuai
 
 **Test Case 2: UNIQUE Constraint pada Email**
 ```sql
@@ -73,7 +73,7 @@ VALUES ('Siswa B', 'duplicate@test.com', 'Aktif');
 Msg 2627, Level 14, State 1
 Violation of UNIQUE KEY constraint. Cannot insert duplicate key.
 ```
-**Status:** ✅ BERHASIL - Email duplikat ditolak
+**Status:**   BERHASIL - Email duplikat ditolak
 
 ---
 
@@ -104,7 +104,7 @@ id_admin | nama_admin      | email                    | role
 2        | Ani Wijaya      | ani.keuangan@gmail.com   | Admin Keuangan
 3        | Dedi Permana    | dedi.akademik@gmail.com  | Admin Akademik
 ```
-**Status:** ✅ BERHASIL (3 baris terinsert)
+**Status:**   BERHASIL (3 baris terinsert)
 
 ```sql
 -- 2. Insert Pengajar
@@ -125,7 +125,7 @@ id_pengajar | nama_pengajar        | bidang_keahlian
 2           | Ahmad Fauzi, M.Pd    | Fisika
 3           | Dewi Lestari, S.Si   | Kimia
 ```
-**Status:** ✅ BERHASIL (3 baris terinsert)
+**Status:**   BERHASIL (3 baris terinsert)
 
 ```sql
 -- 3. Insert Mata Pelajaran
@@ -148,7 +148,7 @@ id_mapel | nama_mapel       | durasi_per_sesi | jenjang
 3        | Kimia            | 90              | SMA
 4        | Bahasa Inggris   | 60              | SMA
 ```
-**Status:** ✅ BERHASIL (4 baris terinsert)
+**Status:**   BERHASIL (4 baris terinsert)
 
 ```sql
 -- 4. Insert Program Bimbingan
@@ -169,7 +169,7 @@ id_program | nama_program                    | biaya     | jumlah_pertemuan
 2          | Program UTBK Saintek             | 2000000   | 16
 3          | Program UTBK Soshum              | 1800000   | 16
 ```
-**Status:** ✅ BERHASIL (3 baris terinsert)
+**Status:**   BERHASIL (3 baris terinsert)
 
 ```sql
 -- 5. Insert Ruangan
@@ -190,7 +190,7 @@ id_ruangan | nama_ruangan | kode_ruangan | kapasitas_ruangan | status_ruangan
 2          | Ruang B      | RUB01        | 25                | Tersedia
 3          | Ruang C      | RUC01        | 35                | Tersedia
 ```
-**Status:** ✅ BERHASIL (3 baris terinsert)
+**Status:**   BERHASIL (3 baris terinsert)
 
 ```sql
 -- 6. Insert Siswa
@@ -215,7 +215,7 @@ id_siswa | nama_siswa        | asal_sekolah      | grade_kelas | status
 4        | Dewi Lestari      | SMA Swasta ABC    | XII IPA     | Aktif
 5        | Rudi Hartono      | SMA Negeri 1      | XII IPA     | Aktif
 ```
-**Status:** ✅ BERHASIL (5 baris terinsert)
+**Status:**   BERHASIL (5 baris terinsert)
 
 ```sql
 -- 7. Insert Kelas
@@ -239,7 +239,7 @@ id_kelas | nama_kelas           | nama_mapel   | nama_pengajar       | status_ke
 2        | Kelas Fisika A       | Fisika       | Ahmad Fauzi, M.Pd   | Aktif
 3        | Kelas Kimia A        | Kimia        | Dewi Lestari, S.Si  | Aktif
 ```
-**Status:** ✅ BERHASIL (3 baris terinsert)
+**Status:**   BERHASIL (3 baris terinsert)
 
 ```sql
 -- 8. Insert Jadwal
@@ -268,7 +268,7 @@ id_jadwal | nama_kelas           | nama_ruangan | hari    | waktu_mulai | waktu_
 3         | Kelas Fisika A       | Ruang B      | Selasa  | 10:00       | 11:30
 1         | Kelas Matematika A   | Ruang A      | Senin   | 08:00       | 09:30
 ```
-**Status:** ✅ BERHASIL (5 baris terinsert)
+**Status:**   BERHASIL (5 baris terinsert)
 
 ```sql
 -- 9. Insert Pendaftaran
@@ -296,7 +296,7 @@ id_pendaftaran | nama_siswa        | nama_program                    | tanggal_d
 4              | Dewi Lestari      | Program UTBK Saintek            | 2024-12-02     | Aktif
 5              | Rudi Hartono      | Program Intensif Matematika     | 2024-12-03     | Aktif
 ```
-**Status:** ✅ BERHASIL (5 baris terinsert)
+**Status:**   BERHASIL (5 baris terinsert)
 
 ```sql
 -- 10. Insert Kehadiran
@@ -324,7 +324,7 @@ id_kehadiran | nama_siswa        | hari    | tanggal     | status_hadir | ketera
 4            | Dewi Lestari      | Selasa  | 2024-12-10  | Izin         | Ada keperluan keluarga
 5            | Budi Santoso      | Jumat   | 2024-12-13  | Sakit        | Flu
 ```
-**Status:** ✅ BERHASIL (5 baris terinsert)
+**Status:**   BERHASIL (5 baris terinsert)
 
 ```sql
 -- 11. Insert Nilai
@@ -352,7 +352,7 @@ id_nilai | nama_siswa        | nama_kelas           | jenis_ujian | tanggal_ujia
 4        | Dewi Lestari      | Kelas Fisika A       | UH          | 2024-12-08    | 88.5  | Baik
 5        | Budi Santoso      | Kelas Kimia A        | Try Out     | 2024-12-10    | 75.0  | Cukup
 ```
-**Status:** ✅ BERHASIL (5 baris terinsert)
+**Status:**   BERHASIL (5 baris terinsert)
 
 ```sql
 -- 12. Insert Transaksi Pembayaran
@@ -380,7 +380,7 @@ id_transaksi | nama_siswa        | nama_kelas           | tanggal_bayar | jumlah
 4            | Dewi Lestari      | Kelas Fisika A       | 2024-12-07    | 2000000      | Lunas
 5            | Rudi Hartono      | Kelas Matematika A   | 2024-12-08    | 750000       | Belum Lunas
 ```
-**Status:** ✅ BERHASIL (5 baris terinsert)
+**Status:**   BERHASIL (5 baris terinsert)
 
 ```sql
 -- 13. Insert Materi
@@ -405,7 +405,7 @@ id_materi | nama_mapel   | judul_materi            | tanggal_upload
 3         | Fisika       | Materi Kinematika       | 2024-12-08
 4         | Kimia        | Materi Stoikiometri     | 2024-12-09
 ```
-**Status:** ✅ BERHASIL (4 baris terinsert)
+**Status:**   BERHASIL (4 baris terinsert)
 
 ```sql
 -- 14. Insert Bank Soal
@@ -430,7 +430,7 @@ id_soal | nama_mapel   | tipe_soal      | tingkat_kesulitan | topik
 3       | Fisika       | Latihan Soal   | MOTS              | Kinematika
 4       | Kimia        | Ujian          | HOTS              | Stoikiometri
 ```
-**Status:** ✅ BERHASIL (4 baris terinsert)
+**Status:**   BERHASIL (4 baris terinsert)
 
 ---
 
@@ -458,7 +458,7 @@ tahun | bulan | total_pemasukan
 
 **Analisis:** Query berhasil menghitung total pemasukan untuk bulan Desember 2024 sebesar Rp 5.500.000 dari 3 transaksi yang berstatus 'Lunas'.
 
-**Status:** ✅ BERHASIL
+**Status:**   BERHASIL
 
 ---
 
@@ -482,7 +482,7 @@ Rudi Hartono    | rudi.siswa@example.com | Kelas Matematika A   | 750000   | Bel
 
 **Analisis:** Query berhasil mengidentifikasi 2 siswa yang memiliki tunggakan pembayaran dengan total Rp 1.650.000.
 
-**Status:** ✅ BERHASIL
+**Status:**   BERHASIL
 
 ---
 
@@ -514,7 +514,7 @@ Kimia        | 75.00           | 75.0            | 75.0
 - Matematika memiliki rentang nilai yang lebih besar (85.5 - 78.0)
 - Kimia baru memiliki satu data nilai
 
-**Status:** ✅ BERHASIL
+**Status:**   BERHASIL
 
 ---
 
@@ -543,7 +543,7 @@ Kelas Kimia A        | 20              | 1                      | 19
 
 **Analisis:** Semua kelas masih memiliki kapasitas yang cukup besar untuk menerima siswa baru.
 
-**Status:** ✅ BERHASIL
+**Status:**   BERHASIL
 
 ---
 
@@ -566,7 +566,7 @@ id_siswa | nama_siswa        | email                    | nama_program          
 5        | Rudi Hartono      | rudi.siswa@example.com   | Program Intensif Matematika     | 1500000   | Aktif
 ```
 
-**Status:** ✅ BERHASIL - View menampilkan data siswa dengan program yang diikuti
+**Status:**   BERHASIL - View menampilkan data siswa dengan program yang diikuti
 
 ---
 
@@ -583,7 +583,7 @@ id_jadwal | nama_kelas           | nama_mapel   | nama_pengajar     | nama_ruang
 1         | Kelas Matematika A   | Matematika   | Dr. Siti Aminah   | Ruang A      | Senin | 08:00       | 09:30
 ```
 
-**Status:** ✅ BERHASIL - View menampilkan jadwal lengkap dengan informasi kelas, pengajar, dan ruangan
+**Status:**   BERHASIL - View menampilkan jadwal lengkap dengan informasi kelas, pengajar, dan ruangan
 
 ---
 
@@ -604,7 +604,7 @@ id_siswa | nama_siswa        | total_pertemuan | total_hadir | total_izin | tota
 3        | Budi Santoso      | 1               | 0           | 0          | 1           | 0          | 0.00
 ```
 
-**Status:** ✅ BERHASIL - View berhasil menghitung persentase kehadiran siswa
+**Status:**   BERHASIL - View berhasil menghitung persentase kehadiran siswa
 
 ---
 
@@ -623,7 +623,7 @@ id_transaksi | tanggal_bayar | nama_siswa        | nama_kelas           | jumlah
 4            | 2024-12-07    | Dewi Lestari      | Kelas Fisika A       | 2000000      | Lunas             | Ani Wijaya
 ```
 
-**Status:** ✅ BERHASIL - View menampilkan detail transaksi pembayaran yang sudah lunas
+**Status:**   BERHASIL - View menampilkan detail transaksi pembayaran yang sudah lunas
 
 ---
 
@@ -642,7 +642,7 @@ id_kelas | nama_kelas           | nama_mapel   | kapasitas_kelas | jumlah_siswa_
 3        | Kelas Kimia A        | Kimia        | 20              | 1                      | 19         | Aktif
 ```
 
-**Status:** ✅ BERHASIL - View menampilkan kapasitas real-time dari setiap kelas
+**Status:**   BERHASIL - View menampilkan kapasitas real-time dari setiap kelas
 
 ---
 
@@ -678,7 +678,7 @@ admin_keuangan    | SQL_LOGIN      | 2024-12-10 10:30:16
 admin_akademik    | SQL_LOGIN      | 2024-12-10 10:30:17
 ```
 
-**Status:** ✅ BERHASIL
+**Status:**   BERHASIL
 
 ---
 
@@ -710,7 +710,7 @@ admin_keuangan    | SQL_USER       | 2024-12-10 10:31:21
 admin_akademik    | SQL_USER       | 2024-12-10 10:31:22
 ```
 
-**Status:** ✅ BERHASIL
+**Status:**   BERHASIL
 
 ---
 
@@ -729,7 +729,7 @@ INSERT INTO ADMIN (nama_admin, email, username, password, role)
 VALUES ('Test Admin', 'test@test.com', 'test', 'test123', 'Admin Akademik'); -- Harus berhasil
 ```
 
-**Status:** ✅ BERHASIL - Super admin memiliki kontrol penuh
+**Status:**   BERHASIL - Super admin memiliki kontrol penuh
 
 ---
 
@@ -743,12 +743,12 @@ GRANT SELECT ON KELAS TO admin_keuangan;
 **Verifikasi - Akses yang Diizinkan:**
 ```sql
 -- Login sebagai admin_keuangan
-SELECT * FROM TRANSAKSI_PEMBAYARAN; -- ✅ Berhasil
-SELECT * FROM SISWA; -- ✅ Berhasil
-SELECT * FROM KELAS; -- ✅ Berhasil
+SELECT * FROM TRANSAKSI_PEMBAYARAN; --   Berhasil
+SELECT * FROM SISWA; --   Berhasil
+SELECT * FROM KELAS; --   Berhasil
 
 INSERT INTO TRANSAKSI_PEMBAYARAN (id_siswa, id_kelas, id_admin, tanggal_bayar, jumlah_bayar, status, metode_pembayaran, keterangan)
-VALUES (1, 1, 2, '2024-12-10', 500000, 'Belum Lunas', 'Cash', 'Cicilan'); -- ✅ Berhasil
+VALUES (1, 1, 2, '2024-12-10', 500000, 'Belum Lunas', 'Cash', 'Cicilan'); --   Berhasil
 ```
 
 **Verifikasi - Akses yang Ditolak:**
@@ -763,7 +763,7 @@ Msg 229, Level 14, State 5
 The SELECT permission was denied on the object 'PENGAJAR'
 ```
 
-**Status:** ✅ BERHASIL - Admin keuangan hanya bisa akses tabel yang diizinkan
+**Status:**   BERHASIL - Admin keuangan hanya bisa akses tabel yang diizinkan
 
 ---
 
@@ -781,9 +781,9 @@ GRANT SELECT ON PENGAJAR TO admin_akademik;
 **Verifikasi - Akses yang Diizinkan:**
 ```sql
 -- Login sebagai admin_akademik
-SELECT * FROM NILAI; -- ✅ Berhasil
+SELECT * FROM NILAI; --   Berhasil
 INSERT INTO NILAI (jenis_ujian, tanggal_ujian, nilai, catatan, id_kelas, id_siswa)
-VALUES ('Quiz', '2024-12-10', 85, 'Baik', 1, 1); -- ✅ Berhasil
+VALUES ('Quiz', '2024-12-10', 85, 'Baik', 1, 1); --   Berhasil
 ```
 
 **Verifikasi - Akses yang Ditolak:**
@@ -798,7 +798,7 @@ Msg 229, Level 14, State 5
 The SELECT permission was denied on the object 'TRANSAKSI_PEMBAYARAN'
 ```
 
-**Status:** ✅ BERHASIL - Admin akademik hanya bisa akses tabel akademik
+**Status:**   BERHASIL - Admin akademik hanya bisa akses tabel akademik
 
 ---
 
@@ -825,7 +825,7 @@ id_transaksi | jumlah_bayar | status
 
 **Analisis:** Trigger berhasil mengubah status dari 'Belum Lunas' menjadi 'Lunas' karena jumlah_bayar >= biaya program.
 
-**Status:** ✅ BERHASIL
+**Status:**   BERHASIL
 
 ---
 
@@ -848,7 +848,7 @@ id_transaksi | jumlah_bayar | status
 
 **Analisis:** Status tetap 'Belum Lunas' karena jumlah_bayar < biaya program.
 
-**Status:** ✅ BERHASIL
+**Status:**   BERHASIL
 
 ---
 
@@ -866,7 +866,7 @@ VALUES (3, '2024-12-11', 'Aktif', 'Pendaftaran baru', 1);
 (1 row affected)
 ```
 
-**Status:** ✅ BERHASIL - Pendaftaran diterima karena kapasitas masih tersedia
+**Status:**   BERHASIL - Pendaftaran diterima karena kapasitas masih tersedia
 
 ---
 
@@ -908,7 +908,7 @@ Siswa 23 berhasil didaftarkan
 Error pada siswa 24: Kapasitas kelas sudah penuh!
 ```
 
-**Status:** ✅ BERHASIL - Trigger mencegah pendaftaran melebihi kapasitas
+**Status:**   BERHASIL - Trigger mencegah pendaftaran melebihi kapasitas
 
 ---
 
@@ -945,7 +945,7 @@ id_siswa | jumlah_bayar | status
 
 **Analisis:** Function menghitung dengan benar total pembayaran yang sudah lunas.
 
-**Status:** ✅ BERHASIL
+**Status:**   BERHASIL
 
 ---
 
@@ -978,7 +978,7 @@ rata_rata
 90.00
 ```
 
-**Status:** ✅ BERHASIL
+**Status:**   BERHASIL
 
 ---
 
@@ -997,7 +997,7 @@ status_kehadiran
 Hadir
 ```
 
-**Status:** ✅ BERHASIL
+**Status:**   BERHASIL
 
 ---
 
@@ -1014,7 +1014,7 @@ status_kehadiran
 Tidak Ada Data
 ```
 
-**Status:** ✅ BERHASIL
+**Status:**   BERHASIL
 
 ---
 
@@ -1058,7 +1058,7 @@ id_siswa | nama_siswa        | nama_program                    | rata_rata_nilai
 
 **Analisis:** Query berhasil menggabungkan data dari berbagai sumber (tabel, view, dan function) untuk memberikan gambaran komprehensif performa siswa.
 
-**Status:** ✅ BERHASIL
+**Status:**   BERHASIL
 
 ---
 
@@ -1092,7 +1092,7 @@ Kelas Fisika A       | 2            | 89.25           | 4000000
 Kelas Kimia A        | 1            | 75.00           | 900000
 ```
 
-**Status:** ✅ BERHASIL - Query berjalan dengan performa baik
+**Status:**   BERHASIL - Query berjalan dengan performa baik
 
 ---
 
@@ -1117,12 +1117,12 @@ Kelas Kimia A        | 1            | 75.00           | 900000
 ### 5.10.2 Temuan dan Rekomendasi
 
 **Kelebihan Sistem:**
-1. ✅ Semua constraint bekerja dengan baik dan mencegah data tidak valid
-2. ✅ Foreign key relationship terjaga dengan baik
-3. ✅ View memberikan abstraksi yang baik untuk query kompleks
-4. ✅ Trigger berhasil mengotomasi proses bisnis
-5. ✅ Function memudahkan kalkulasi berulang
-6. ✅ DCL mengatur hak akses dengan tepat
+1.   Semua constraint bekerja dengan baik dan mencegah data tidak valid
+2.   Foreign key relationship terjaga dengan baik
+3.   View memberikan abstraksi yang baik untuk query kompleks
+4.   Trigger berhasil mengotomasi proses bisnis
+5.   Function memudahkan kalkulasi berulang
+6.   DCL mengatur hak akses dengan tepat
 
 **Rekomendasi Pengembangan:**
 1. 📌 Menambahkan index pada kolom yang sering digunakan untuk JOIN (id_siswa, id_kelas, id_program)
@@ -1163,4 +1163,4 @@ Hasil pengujian menunjukkan bahwa sistem basis data bimbingan belajar telah berh
 
 **Tanggal Pengujian:** 10 Desember 2024  
 **Versi Database:** SQL Server 2019  
-**Status Akhir:** ✅ **LULUS SEMUA PENGUJIAN**
+**Status Akhir:**   **LULUS SEMUA PENGUJIAN**
