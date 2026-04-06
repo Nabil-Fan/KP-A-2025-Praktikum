@@ -205,11 +205,3 @@ docs: update README dengan instruksi setup
 | [Nama 4] | [email@example.com] |
 
 ---
-
-<div align="center">
-
-📚 **Rekayasa Perangkat Lunak** &nbsp;|&nbsp; [Nama Universitas] &nbsp;|&nbsp; 2024/2025
-
-*Dibuat dengan ❤️ oleh Kelompok [Nomor]*
-
-</div>
