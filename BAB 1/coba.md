@@ -1,239 +1,149 @@
-# 🚀 Praktikum RPL — [Kelas]-[Nomor Kelompok]
+# Data Dictionary — EcoEats
 
-> Repositori resmi kelompok untuk mata kuliah **Rekayasa Perangkat Lunak**  
-> Semester Genap 2024/2025 — Universitas [Nama Universitas]
-
----
-
-## 📋 Daftar Isi
-
-- [Tentang Repositori](#-tentang-repositori)
-- [Anggota Tim](#-anggota-tim)
-- [Struktur Folder](#-struktur-folder)
-- [Topik Proyek](#-topik-proyek)
-- [Teknologi yang Digunakan](#-teknologi-yang-digunakan)
-- [Cara Berkontribusi](#-cara-berkontribusi)
-- [Workflow Git](#-workflow-git)
-- [Standar Commit Message](#-standar-commit-message)
-- [Progress & Status](#-progress--status)
-- [Kontak Tim](#-kontak-tim)
+> Dokumen ini mendokumentasikan seluruh tabel dan kolom pada basis data platform EcoEats.
+> Dibuat sebagai bagian dari artefak P4 — Praktikum Rekayasa Perangkat Lunak.
 
 ---
 
-## 📌 Tentang Repositori
+## Tabel: `users`
 
-Repositori ini digunakan sebagai wadah kolaborasi tim dalam pengerjaan praktikum Rekayasa Perangkat Lunak. Seluruh dokumentasi, kode sumber, dan artefak pengujian dikelola di sini menggunakan **Git Feature Branch Workflow**.
+Menyimpan semua akun pengguna platform (user biasa, merchant, dan admin). Peran dibedakan menggunakan kolom `role`.
 
-| Atribut        | Detail                          |
-|----------------|---------------------------------|
-| 🏫 Kelas       | [Kelas A / B]                   |
-| 👥 Kelompok    | [Nomor Kelompok]                |
-| 📅 Semester    | Genap 2024/2025                 |
-| 🌿 Branch Utama| `dev`                           |
-
----
-
-## 👥 Anggota Tim
-
-| No | Nama Lengkap | NIM | Peran | GitHub |
-|----|--------------|-----|-------|--------|
-| 1  | [Nama Anggota 1] | [NIM] | Ketua / Project Manager | [@username](https://github.com/username) |
-| 2  | [Nama Anggota 2] | [NIM] | Backend Developer | [@username](https://github.com/username) |
-| 3  | [Nama Anggota 3] | [NIM] | Frontend Developer | [@username](https://github.com/username) |
-| 4  | [Nama Anggota 4] | [NIM] | QA / Dokumentasi | [@username](https://github.com/username) |
+| Kolom | Tipe Data | Constraint | Keterangan |
+|---|---|---|---|
+| `id` | INT | PK, AUTO_INCREMENT | ID unik pengguna |
+| `name` | VARCHAR(100) | NOT NULL | Nama lengkap pengguna |
+| `email` | VARCHAR(255) | UNIQUE, NOT NULL | Email untuk login dan notifikasi |
+| `password_hash` | VARCHAR(255) | NOT NULL | Password yang di-hash menggunakan bcrypt (cost factor ≥ 10) |
+| `phone` | VARCHAR(20) | NULL | Nomor HP (opsional, untuk notifikasi) |
+| `role` | ENUM('user', 'merchant', 'admin') | NOT NULL, DEFAULT 'user' | Peran pengguna dalam sistem |
+| `created_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP | Waktu akun dibuat |
+| `updated_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | Waktu terakhir data diperbarui |
 
 ---
 
-## 📁 Struktur Folder
+## Tabel: `merchant_profiles`
 
-```
-praktikum-rpl-[kelas]-[nomor]/
-│
-├── docs/                        # Dokumentasi proyek
-│   ├── team-contract.md         # Kontrak tim
-│   ├── requirements/            # Dokumen kebutuhan sistem
-│   └── diagrams/                # Diagram UML, ERD, dll.
-│
-├── src/                         # Kode sumber aplikasi
-│   ├── main/                    # Kode utama
-│   └── utils/                   # Fungsi utilitas
-│
-├── tests/                       # File pengujian
-│   ├── unit/                    # Unit test
-│   └── integration/             # Integration test
-│
-├── .gitignore                   # File yang diabaikan Git
-└── README.md                    # Dokumentasi utama (file ini)
-```
+Menyimpan informasi detail dan status verifikasi mitra merchant. Setiap merchant memiliki tepat satu profil (relasi 1:1 dengan `users`).
+
+| Kolom | Tipe Data | Constraint | Keterangan |
+|---|---|---|---|
+| `id` | INT | PK, AUTO_INCREMENT | ID unik profil merchant |
+| `user_id` | INT | FK → users.id, UNIQUE, NOT NULL | Referensi ke akun pengguna |
+| `business_name` | VARCHAR(150) | NOT NULL | Nama usaha kuliner |
+| `business_address` | TEXT | NOT NULL | Alamat lengkap tempat usaha |
+| `latitude` | DECIMAL(10,7) | NOT NULL | Koordinat lintang lokasi merchant |
+| `longitude` | DECIMAL(10,7) | NOT NULL | Koordinat bujur lokasi merchant |
+| `business_license_url` | VARCHAR(500) | NULL | URL file foto surat izin usaha yang diunggah |
+| `halal_cert_url` | VARCHAR(500) | NULL | URL file sertifikat halal (jika ada) |
+| `verification_status` | ENUM('pending', 'approved', 'rejected') | NOT NULL, DEFAULT 'pending' | Status verifikasi dokumen oleh admin |
+| `verified_at` | TIMESTAMP | NULL | Waktu akun merchant disetujui admin |
+| `created_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP | Waktu profil dibuat |
 
 ---
 
-## 💡 Topik Proyek
+## Tabel: `food_listings`
 
-> **Status:** 🔄 PENDING / ✅ DISETUJUI *(sesuaikan)*
+Menyimpan daftar makanan surplus yang dipublikasikan oleh merchant.
 
-### Judul Sementara
-> **[Nama Aplikasi / Sistem]**
-
-### Deskripsi Singkat
-> *[Tuliskan deskripsi singkat tentang studi kasus atau sistem yang akan dibangun, misalnya: "Sistem manajemen peminjaman buku perpustakaan berbasis web untuk memudahkan pengelolaan koleksi dan transaksi peminjaman."]*
-
-| Atribut         | Detail                          |
-|-----------------|---------------------------------|
-| 🗂️ Domain       | [Pendidikan / Kesehatan / UMKM / dll.] |
-| 👤 Aktor Utama  | [Admin, User, dll.]             |
-| ⭐ Fitur Inti   | [Fitur 1, Fitur 2, Fitur 3]     |
-
----
-
-## 🛠️ Teknologi yang Digunakan
-
-> *(Sesuaikan dengan stack teknologi kelompok)*
-
-| Kategori     | Teknologi       |
-|--------------|-----------------|
-| Backend      | -               |
-| Frontend     | -               |
-| Database     | -               |
-| Version Control | Git & GitHub |
-| Editor       | VS Code         |
+| Kolom | Tipe Data | Constraint | Keterangan |
+|---|---|---|---|
+| `id` | INT | PK, AUTO_INCREMENT | ID unik listing makanan |
+| `merchant_id` | INT | FK → merchant_profiles.id, NOT NULL | Referensi ke profil merchant pemilik listing |
+| `name` | VARCHAR(150) | NOT NULL | Nama produk makanan surplus |
+| `description` | TEXT | NULL | Deskripsi singkat produk |
+| `category` | VARCHAR(50) | NOT NULL | Kategori makanan (misal: Nasi & Mie, Roti & Kue, Minuman) |
+| `original_price` | DECIMAL(10,2) | NOT NULL | Harga normal produk sebelum diskon |
+| `discount_price` | DECIMAL(10,2) | NOT NULL | Harga jual surplus (harga diskon) |
+| `stock_qty` | INT | NOT NULL, DEFAULT 0 | Jumlah stok tersedia saat ini |
+| `photo_url` | VARCHAR(500) | NULL | URL foto produk yang diunggah merchant |
+| `pickup_start` | TIMESTAMP | NOT NULL | Waktu mulai pengambilan tersedia |
+| `pickup_end` | TIMESTAMP | NOT NULL | Batas waktu pengambilan (deadline) |
+| `status` | ENUM('available', 'unavailable', 'sold_out') | NOT NULL, DEFAULT 'available' | Status ketersediaan listing |
+| `created_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP | Waktu listing dibuat |
+| `updated_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | Waktu terakhir listing diperbarui |
 
 ---
 
-## 🤝 Cara Berkontribusi
+## Tabel: `orders`
 
-Semua anggota tim wajib mengikuti alur kerja berikut sebelum membuat perubahan pada repositori:
+Menyimpan transaksi pemesanan yang dilakukan user kepada merchant.
 
-1. **Pastikan branch `dev` sudah terbaru**
-   ```bash
-   git checkout dev
-   git pull origin dev
-   ```
-
-2. **Buat branch baru untuk fitur/tugas**
-   ```bash
-   git checkout -b feature/nama-fitur
-   ```
-
-3. **Lakukan perubahan, lalu commit**
-   ```bash
-   git add .
-   git commit -m "feat: deskripsi perubahan singkat"
-   ```
-
-4. **Push branch ke GitHub**
-   ```bash
-   git push origin feature/nama-fitur
-   ```
-
-5. **Buat Pull Request ke branch `dev`** melalui GitHub  
-   → Minta minimal **1 anggota lain** untuk melakukan review  
-   → Merge setelah disetujui
+| Kolom | Tipe Data | Constraint | Keterangan |
+|---|---|---|---|
+| `id` | INT | PK, AUTO_INCREMENT | ID unik pesanan |
+| `user_id` | INT | FK → users.id, NOT NULL | Referensi ke pengguna yang memesan |
+| `merchant_id` | INT | FK → merchant_profiles.id, NOT NULL | Referensi ke merchant yang menerima pesanan |
+| `pickup_code` | VARCHAR(10) | UNIQUE, NOT NULL | Kode unik pengambilan yang diberikan ke user setelah checkout |
+| `status` | ENUM('pending', 'confirmed', 'ready', 'completed', 'rejected', 'expired') | NOT NULL, DEFAULT 'pending' | Status pesanan saat ini |
+| `total_amount` | DECIMAL(10,2) | NOT NULL | Total harga yang dibayarkan user |
+| `payment_method` | VARCHAR(50) | NOT NULL | Metode pembayaran yang dipilih (misal: transfer, e-wallet) |
+| `payment_status` | ENUM('unpaid', 'paid', 'refunded') | NOT NULL, DEFAULT 'unpaid' | Status pembayaran |
+| `ordered_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP | Waktu pesanan dibuat |
+| `confirmed_at` | TIMESTAMP | NULL | Waktu merchant mengkonfirmasi pesanan |
+| `completed_at` | TIMESTAMP | NULL | Waktu pesanan selesai (pickup berhasil) |
 
 ---
 
-## 🌿 Workflow Git
+## Tabel: `order_items`
 
-Repositori ini menggunakan **Feature Branch Workflow**:
+Tabel penghubung (junction table) antara `orders` dan `food_listings`. Satu pesanan dapat berisi banyak item makanan.
 
-```
-main
- └── dev  ← branch default & utama pengembangan
-      ├── feature/add-[nama]-info
-      ├── feature/nama-fitur-lain
-      └── fix/perbaikan-bug
-```
-
-- Branch `main` → versi stabil / rilis
-- Branch `dev` → integrasi pengembangan aktif
-- Branch `feature/*` → pengerjaan fitur per anggota
+| Kolom | Tipe Data | Constraint | Keterangan |
+|---|---|---|---|
+| `id` | INT | PK, AUTO_INCREMENT | ID unik record item pesanan |
+| `order_id` | INT | FK → orders.id, NOT NULL | Referensi ke pesanan induk |
+| `food_listing_id` | INT | FK → food_listings.id, NOT NULL | Referensi ke listing makanan yang dipesan |
+| `quantity` | INT | NOT NULL, DEFAULT 1 | Jumlah porsi yang dipesan |
+| `unit_price` | DECIMAL(10,2) | NOT NULL | Harga satuan pada saat transaksi (snapshot harga) |
+| `subtotal` | DECIMAL(10,2) | NOT NULL | Hasil perkalian quantity × unit_price |
 
 ---
 
-## ✍️ Standar Commit Message
+## Tabel: `merchant_verifications`
 
-Gunakan format berikut untuk semua commit:
+Menyimpan log riwayat keputusan verifikasi yang dilakukan admin terhadap pengajuan merchant. Mendukung audit trail.
 
-```
-<type>: <deskripsi singkat dalam bahasa Indonesia atau Inggris>
-```
-
-| Type       | Digunakan untuk                            |
-|------------|--------------------------------------------|
-| `feat`     | Menambahkan fitur baru                     |
-| `fix`      | Memperbaiki bug                            |
-| `docs`     | Perubahan dokumentasi                      |
-| `style`    | Perubahan format/tampilan (bukan logika)   |
-| `refactor` | Refactoring kode tanpa mengubah fungsi     |
-| `test`     | Menambah atau mengubah test                |
-| `chore`    | Update konfigurasi, dependency, dll.       |
-
-**Contoh:**
-```
-feat: tambah halaman login pengguna
-fix: perbaiki validasi input form registrasi
-docs: update README dengan instruksi setup
-```
+| Kolom | Tipe Data | Constraint | Keterangan |
+|---|---|---|---|
+| `id` | INT | PK, AUTO_INCREMENT | ID unik record verifikasi |
+| `merchant_id` | INT | FK → merchant_profiles.id, NOT NULL | Referensi ke profil merchant yang diajukan |
+| `admin_id` | INT | FK → users.id, NOT NULL | Referensi ke akun admin yang mengambil keputusan |
+| `action` | ENUM('approved', 'rejected') | NOT NULL | Keputusan admin: disetujui atau ditolak |
+| `notes` | TEXT | NULL | Catatan atau alasan keputusan dari admin |
+| `actioned_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP | Waktu keputusan diambil |
 
 ---
 
-## 📊 Progress & Status
+## Tabel: `reviews`
 
-### Praktikum 1 — Setup & Git Workflow
+Menyimpan rating dan ulasan yang diberikan user kepada merchant setelah pesanan selesai.
+> **Catatan**: Fitur ini memiliki prioritas **Low** (US-14 — Won't Have pada sprint ini) dan dapat ditangguhkan ke rilis berikutnya.
 
-| Tugas                                      | Status |
-|--------------------------------------------|--------|
-| Kelompok terbentuk dan ketua ditentukan    | ✅ / 🔄 |
-| Kontrak tim ditulis (`team-contract.md`)   | ✅ / 🔄 |
-| Repositori GitHub dibuat                   | ✅ / 🔄 |
-| Branch `dev` dibuat dan dijadikan default  | ✅ / 🔄 |
-| Setiap anggota merge minimal 1 Pull Request| ✅ / 🔄 |
-| Topik diregistrasi di Google Sheet         | ✅ / 🔄 |
-| Issue `[SUBMISSION] P1 Evidence` dibuat    | ✅ / 🔄 |
-
-> Keterangan: ✅ Selesai &nbsp;|&nbsp; 🔄 Dalam Proses &nbsp;|&nbsp; ❌ Belum Dimulai
-
----
-
-## 📞 Kontak Tim
-
-| Nama | Email / WhatsApp |
-|------|-----------------|
-| [Nama 1] | [email@example.com] |
-| [Nama 2] | [email@example.com] |
-| [Nama 3] | [email@example.com] |
-| [Nama 4] | [email@example.com] |
+| Kolom | Tipe Data | Constraint | Keterangan |
+|---|---|---|---|
+| `id` | INT | PK, AUTO_INCREMENT | ID unik ulasan |
+| `order_id` | INT | FK → orders.id, UNIQUE, NOT NULL | Referensi ke pesanan yang diulas (satu pesanan hanya boleh satu ulasan) |
+| `user_id` | INT | FK → users.id, NOT NULL | Referensi ke pengguna yang menulis ulasan |
+| `merchant_id` | INT | FK → merchant_profiles.id, NOT NULL | Referensi ke merchant yang diulas |
+| `rating` | TINYINT | NOT NULL, CHECK (rating BETWEEN 1 AND 5) | Nilai rating bintang 1–5 |
+| `comment` | TEXT | NULL | Teks ulasan (opsional) |
+| `created_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP | Waktu ulasan dibuat |
 
 ---
 
-## Aturan Komunikasi dan Respons Tim (Communication & Response Rules)
+## Ringkasan Relasi Antar Tabel
 
-Untuk menjaga kelancaran proyek dan menghargai waktu masing-masing anggota, tim menyepakati aturan komunikasi dan standar waktu respons sebagai berikut:
-
-### 1. Saluran Komunikasi Utama (Channels)
-* **Grup WhatsApp / Telegram:** Digunakan untuk diskusi umum, koordinasi jadwal, *update* harian yang sifatnya kasual, dan keadaan darurat (*urgent*).
-* **GitHub (Issue & Pull Request):** Digunakan secara eksklusif untuk diskusi teknis terkait *source code*, *review* fitur, dan *bug tracking*.
-* **Google Meet / Zoom / Discord:** Digunakan untuk rapat sinkronisasi (*sync meeting*) atau *pair programming*.
-
-### 2. Jam Operasional Tim (Core Hours)
-Mengingat setiap anggota memiliki kesibukan akademis lain, waktu operasional tim disepakati pada:
-* **Senin - Jumat:** Pukul 18.00 - 22.00 WIB
-* **Sabtu - Minggu:** Fleksibel (Sesuai kesepakatan di grup)
-* *Catatan:* Pesan yang dikirim di luar jam operasional tetap dipersilakan, namun anggota tidak diwajibkan untuk langsung membalas hingga jam operasional berikutnya dimulai.
-
-### 3. Standar Waktu Respons (Service Level Agreement)
-Setiap anggota tim berkomitmen untuk mematuhi batas waktu respons berikut:
-* **Pesan Biasa / Informasi Umum:** Wajib dibalas atau minimal diberikan reaksi (emoji jempol/OK) maksimal dalam **12 jam**.
-* **Pesan dengan *Mention* (@nama):** Jika nama spesifik di-*tag*, wajib merespons maksimal dalam **6 jam** (pada jam operasional).
-* **Pull Request (PR) Review:** Anggota yang ditugaskan untuk melakukan *code review* wajib menyelesaikannya maksimal dalam **24 jam** sejak PR dibuat.
-* **Keadaan Darurat (*Blocker* / *Urgent*):** Jika ada *error* kritis atau tenggat waktu tugas tinggal 24 jam, anggota wajib merespons maksimal dalam **2 jam**. Pemanggil berhak menelepon langsung jika tidak ada respons via *chat*.
-
-### 4. Budaya Komunikasi & Etika
-* **Acknowledge (Konfirmasi Penerimaan):** Setiap kali membaca pesan yang berisi instruksi atau pembagian tugas, anggota **wajib** merespons (misal: "Siap", "Noted", atau menggunakan emoji 👍) agar pengirim tahu pesannya sudah tersampaikan.
-* **Pemberitahuan Ketidakhadiran (Izin):** Jika seorang anggota berhalangan hadir dalam rapat, sedang sakit, atau tidak bisa mengerjakan tugas selama lebih dari 24 jam, **wajib** menginformasikan ke grup maksimal 12 jam sebelumnya atau sesegera mungkin.
-
-### 5. Mekanisme Eskalasi & Sanksi (Penanganan Kendala Aktifitas)
-Jika ada anggota yang melanggar aturan respons (misalnya *ghosting* atau tidak mengerjakan tugas tanpa kabar), tim akan melakukan langkah-langkah eskalasi berikut:
-1. **Peringatan 1 (Personal):** Ketua kelompok akan menghubungi secara personal (*Direct Message*) untuk menanyakan kendala yang sedang dialami (maksimal 1x24 jam setelah tidak ada respons di grup).
-2. **Peringatan 2 (Grup):** Jika teguran personal diabaikan, anggota tersebut akan di-*mention* di grup utama dan tugasnya akan diambil alih sementara agar proyek tidak terhambat.
-3. **Eskalasi ke Dosen/Asisten (Final):** Jika selama **3x24 jam** tetap tidak ada respons dan kontribusi tanpa alasan yang jelas, tim berhak melaporkan anggota tersebut kepada dosen/asisten praktikum sebagai laporan *free rider*, yang berpotensi memengaruhi nilai akhir yang bersangkutan.
+| Dari | Ke | Kardinalitas | Keterangan |
+|---|---|---|---|
+| `users` | `merchant_profiles` | 1 : 0..1 | Satu user (merchant) memiliki satu profil merchant |
+| `merchant_profiles` | `food_listings` | 1 : N | Satu merchant dapat memposting banyak listing makanan |
+| `users` | `orders` | 1 : N | Satu user dapat membuat banyak pesanan |
+| `merchant_profiles` | `orders` | 1 : N | Satu merchant dapat menerima banyak pesanan |
+| `orders` | `order_items` | 1 : N | Satu pesanan berisi satu atau lebih item |
+| `food_listings` | `order_items` | 1 : N | Satu listing dapat muncul di banyak pesanan berbeda |
+| `merchant_profiles` | `merchant_verifications` | 1 : N | Satu merchant bisa memiliki riwayat beberapa kali verifikasi |
+| `users` (admin) | `merchant_verifications` | 1 : N | Satu admin dapat menangani banyak verifikasi |
+| `orders` | `reviews` | 1 : 0..1 | Satu pesanan hanya menghasilkan satu ulasan |
+| `users` | `reviews` | 1 : N | Satu user dapat menulis banyak ulasan |
+| `merchant_profiles` | `reviews` | 1 : N | Satu merchant dapat menerima banyak ulasan |
