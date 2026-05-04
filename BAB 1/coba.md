@@ -1,7 +1,8 @@
-# Data Dictionary — EcoEats
+# Data Dictionary — EcoEats v2.0
 
-> Dokumen ini mendokumentasikan seluruh tabel dan kolom pada basis data platform EcoEats.
-> Dibuat sebagai bagian dari artefak P4 — Praktikum Rekayasa Perangkat Lunak.
+> **Keterangan penanda:**
+> - 🆕 = kolom/tabel baru di v2.0
+> - 🔄 = kolom yang mengalami perubahan dari v1
 
 ---
 
@@ -19,6 +20,19 @@ Menyimpan semua akun pengguna platform (user biasa, merchant, dan admin). Peran 
 | `role` | ENUM('user', 'merchant', 'admin') | NOT NULL, DEFAULT 'user' | Peran pengguna dalam sistem |
 | `created_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP | Waktu akun dibuat |
 | `updated_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | Waktu terakhir data diperbarui |
+| 🆕 `deleted_at` | TIMESTAMP | NULL | Soft delete — NULL berarti aktif. Diisi timestamp saat akun dihapus. Semua query aktif **wajib** filter `WHERE deleted_at IS NULL` |
+
+---
+
+## Tabel: `categories` 🆕
+
+Menyimpan daftar kategori makanan yang digunakan oleh `food_listings`. Menggantikan kolom `category VARCHAR` bebas di v1 untuk menjamin konsistensi data dan kemudahan filtering.
+
+| Kolom | Tipe Data | Constraint | Keterangan |
+|---|---|---|---|
+| 🆕 `id` | INT | PK, AUTO_INCREMENT | ID unik kategori |
+| 🆕 `name` | VARCHAR(80) | UNIQUE, NOT NULL | Nama kategori makanan, misal: Nasi & Mie, Roti & Kue, Minuman. UNIQUE mencegah duplikasi |
+| 🆕 `created_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP | Waktu kategori dibuat |
 
 ---
 
@@ -29,11 +43,11 @@ Menyimpan informasi detail dan status verifikasi mitra merchant. Setiap merchant
 | Kolom | Tipe Data | Constraint | Keterangan |
 |---|---|---|---|
 | `id` | INT | PK, AUTO_INCREMENT | ID unik profil merchant |
-| `user_id` | INT | FK → users.id, UNIQUE, NOT NULL | Referensi ke akun pengguna |
+| `user_id` | INT | FK → users.id, UNIQUE, NOT NULL | Referensi ke akun pengguna. UNIQUE memastikan 1 user hanya punya 1 profil merchant |
 | `business_name` | VARCHAR(150) | NOT NULL | Nama usaha kuliner |
 | `business_address` | TEXT | NOT NULL | Alamat lengkap tempat usaha |
-| `latitude` | DECIMAL(10,7) | NOT NULL | Koordinat lintang lokasi merchant |
-| `longitude` | DECIMAL(10,7) | NOT NULL | Koordinat bujur lokasi merchant |
+| `latitude` | DECIMAL(10,7) | NOT NULL, CHECK(-90 ≤ value ≤ 90) | Koordinat lintang lokasi merchant. Validasi range wajib diterapkan di level aplikasi dan DB |
+| `longitude` | DECIMAL(10,7) | NOT NULL, CHECK(-180 ≤ value ≤ 180) | Koordinat bujur lokasi merchant. Validasi range wajib diterapkan di level aplikasi dan DB |
 | `business_license_url` | VARCHAR(500) | NULL | URL file foto surat izin usaha yang diunggah |
 | `halal_cert_url` | VARCHAR(500) | NULL | URL file sertifikat halal (jika ada) |
 | `verification_status` | ENUM('pending', 'approved', 'rejected') | NOT NULL, DEFAULT 'pending' | Status verifikasi dokumen oleh admin |
@@ -50,9 +64,9 @@ Menyimpan daftar makanan surplus yang dipublikasikan oleh merchant.
 |---|---|---|---|
 | `id` | INT | PK, AUTO_INCREMENT | ID unik listing makanan |
 | `merchant_id` | INT | FK → merchant_profiles.id, NOT NULL | Referensi ke profil merchant pemilik listing |
+| 🔄 `category_id` | INT | FK → categories.id, NOT NULL | Menggantikan kolom `category VARCHAR(50)` bebas. Referensi ke tabel `categories` |
 | `name` | VARCHAR(150) | NOT NULL | Nama produk makanan surplus |
 | `description` | TEXT | NULL | Deskripsi singkat produk |
-| `category` | VARCHAR(50) | NOT NULL | Kategori makanan (misal: Nasi & Mie, Roti & Kue, Minuman) |
 | `original_price` | DECIMAL(10,2) | NOT NULL | Harga normal produk sebelum diskon |
 | `discount_price` | DECIMAL(10,2) | NOT NULL | Harga jual surplus (harga diskon) |
 | `stock_qty` | INT | NOT NULL, DEFAULT 0 | Jumlah stok tersedia saat ini |
@@ -62,6 +76,7 @@ Menyimpan daftar makanan surplus yang dipublikasikan oleh merchant.
 | `status` | ENUM('available', 'unavailable', 'sold_out') | NOT NULL, DEFAULT 'available' | Status ketersediaan listing |
 | `created_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP | Waktu listing dibuat |
 | `updated_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | Waktu terakhir listing diperbarui |
+| 🆕 `deleted_at` | TIMESTAMP | NULL | Soft delete listing. NULL = aktif. Query aktif wajib filter `WHERE deleted_at IS NULL` |
 
 ---
 
@@ -77,23 +92,48 @@ Menyimpan transaksi pemesanan yang dilakukan user kepada merchant.
 | `pickup_code` | VARCHAR(10) | UNIQUE, NOT NULL | Kode unik pengambilan yang diberikan ke user setelah checkout |
 | `status` | ENUM('pending', 'confirmed', 'ready', 'completed', 'rejected', 'expired') | NOT NULL, DEFAULT 'pending' | Status pesanan saat ini |
 | `total_amount` | DECIMAL(10,2) | NOT NULL | Total harga yang dibayarkan user |
-| `payment_method` | VARCHAR(50) | NOT NULL | Metode pembayaran yang dipilih (misal: transfer, e-wallet) |
-| `payment_status` | ENUM('unpaid', 'paid', 'refunded') | NOT NULL, DEFAULT 'unpaid' | Status pembayaran |
+| 🔄 `payment_method` | ENUM('transfer', 'ewallet', 'cash', 'qris') | NOT NULL | Metode pembayaran. Diubah dari VARCHAR bebas ke ENUM untuk mencegah data kotor |
 | `ordered_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP | Waktu pesanan dibuat |
+| 🆕 `expires_at` | TIMESTAMP | NOT NULL | Deadline konfirmasi merchant. Jika terlampaui dan status masih `pending`, scheduler mengubah status ke `expired` |
 | `confirmed_at` | TIMESTAMP | NULL | Waktu merchant mengkonfirmasi pesanan |
 | `completed_at` | TIMESTAMP | NULL | Waktu pesanan selesai (pickup berhasil) |
+| 🆕 `rejected_at` | TIMESTAMP | NULL | Waktu merchant menolak pesanan. Diisi saat status berubah ke `rejected` |
+| 🆕 `expired_at` | TIMESTAMP | NULL | Waktu pesanan kadaluarsa secara aktual. Diisi oleh scheduler saat status diubah ke `expired` |
+| 🆕 `updated_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | Waktu terakhir record diperbarui |
+
+> **Catatan:** Kolom `payment_status` dihapus dari tabel ini dan dipindahkan ke tabel `payments` yang lebih lengkap.
+
+---
+
+## Tabel: `payments` 🆕
+
+Menyimpan riwayat attempt pembayaran untuk setiap pesanan. Dipisahkan dari `orders` agar mendukung multi-gateway (Midtrans, Xendit, manual), retry pembayaran, dan audit riwayat.
+
+| Kolom | Tipe Data | Constraint | Keterangan |
+|---|---|---|---|
+| 🆕 `id` | INT | PK, AUTO_INCREMENT | ID unik record pembayaran |
+| 🆕 `order_id` | INT | FK → orders.id, NOT NULL | Referensi ke pesanan terkait. Satu order dapat memiliki lebih dari satu record (retry) |
+| 🆕 `payment_gateway` | VARCHAR(50) | NOT NULL | Nama gateway yang digunakan, misal: `midtrans`, `xendit`, `manual` |
+| 🆕 `transaction_id` | VARCHAR(255) | NULL | ID transaksi dari pihak payment gateway. NULL jika pembayaran manual atau belum diproses |
+| 🆕 `amount` | DECIMAL(10,2) | NOT NULL | Nominal yang dibayarkan pada attempt ini |
+| 🆕 `status` | ENUM('pending', 'paid', 'failed', 'refunded', 'expired') | NOT NULL, DEFAULT 'pending' | Status pembayaran pada attempt ini |
+| 🆕 `payment_proof_url` | VARCHAR(500) | NULL | URL bukti transfer untuk metode manual. NULL jika menggunakan gateway otomatis |
+| 🆕 `paid_at` | TIMESTAMP | NULL | Waktu pembayaran dikonfirmasi berhasil. NULL jika belum lunas |
+| 🆕 `expired_at` | TIMESTAMP | NULL | Batas waktu pembayaran dari gateway. NULL jika tidak ada batas dari gateway |
+| 🆕 `created_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP | Waktu attempt pembayaran dibuat |
 
 ---
 
 ## Tabel: `order_items`
 
-Tabel penghubung (junction table) antara `orders` dan `food_listings`. Satu pesanan dapat berisi banyak item makanan.
+Junction table antara `orders` dan `food_listings`. Satu pesanan dapat berisi banyak item makanan.
 
 | Kolom | Tipe Data | Constraint | Keterangan |
 |---|---|---|---|
 | `id` | INT | PK, AUTO_INCREMENT | ID unik record item pesanan |
 | `order_id` | INT | FK → orders.id, NOT NULL | Referensi ke pesanan induk |
 | `food_listing_id` | INT | FK → food_listings.id, NOT NULL | Referensi ke listing makanan yang dipesan |
+| 🆕 `listing_name` | VARCHAR(150) | NOT NULL | Snapshot nama produk saat transaksi. Mencegah data historis rusak jika listing diubah atau di-soft-delete |
 | `quantity` | INT | NOT NULL, DEFAULT 1 | Jumlah porsi yang dipesan |
 | `unit_price` | DECIMAL(10,2) | NOT NULL | Harga satuan pada saat transaksi (snapshot harga) |
 | `subtotal` | DECIMAL(10,2) | NOT NULL | Hasil perkalian quantity × unit_price |
@@ -102,33 +142,16 @@ Tabel penghubung (junction table) antara `orders` dan `food_listings`. Satu pesa
 
 ## Tabel: `merchant_verifications`
 
-Menyimpan log riwayat keputusan verifikasi yang dilakukan admin terhadap pengajuan merchant. Mendukung audit trail.
+Menyimpan log riwayat keputusan verifikasi yang dilakukan admin terhadap pengajuan merchant. Mendukung audit trail. Tidak ada perubahan dari v1.
 
 | Kolom | Tipe Data | Constraint | Keterangan |
 |---|---|---|---|
 | `id` | INT | PK, AUTO_INCREMENT | ID unik record verifikasi |
 | `merchant_id` | INT | FK → merchant_profiles.id, NOT NULL | Referensi ke profil merchant yang diajukan |
-| `admin_id` | INT | FK → users.id, NOT NULL | Referensi ke akun admin yang mengambil keputusan |
+| `admin_id` | INT | FK → users.id, NOT NULL | Referensi ke akun admin (role = admin) yang mengambil keputusan |
 | `action` | ENUM('approved', 'rejected') | NOT NULL | Keputusan admin: disetujui atau ditolak |
 | `notes` | TEXT | NULL | Catatan atau alasan keputusan dari admin |
 | `actioned_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP | Waktu keputusan diambil |
-
----
-
-## Tabel: `reviews`
-
-Menyimpan rating dan ulasan yang diberikan user kepada merchant setelah pesanan selesai.
-> **Catatan**: Fitur ini memiliki prioritas **Low** (US-14 — Won't Have pada sprint ini) dan dapat ditangguhkan ke rilis berikutnya.
-
-| Kolom | Tipe Data | Constraint | Keterangan |
-|---|---|---|---|
-| `id` | INT | PK, AUTO_INCREMENT | ID unik ulasan |
-| `order_id` | INT | FK → orders.id, UNIQUE, NOT NULL | Referensi ke pesanan yang diulas (satu pesanan hanya boleh satu ulasan) |
-| `user_id` | INT | FK → users.id, NOT NULL | Referensi ke pengguna yang menulis ulasan |
-| `merchant_id` | INT | FK → merchant_profiles.id, NOT NULL | Referensi ke merchant yang diulas |
-| `rating` | TINYINT | NOT NULL, CHECK (rating BETWEEN 1 AND 5) | Nilai rating bintang 1–5 |
-| `comment` | TEXT | NULL | Teks ulasan (opsional) |
-| `created_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP | Waktu ulasan dibuat |
 
 ---
 
@@ -136,14 +159,36 @@ Menyimpan rating dan ulasan yang diberikan user kepada merchant setelah pesanan 
 
 | Dari | Ke | Kardinalitas | Keterangan |
 |---|---|---|---|
-| `users` | `merchant_profiles` | 1 : 0..1 | Satu user (merchant) memiliki satu profil merchant |
+| `users` | `merchant_profiles` | 1 : 0..1 | Satu user (merchant) memiliki nol atau satu profil merchant |
+| `categories` | `food_listings` | 1 : N | Satu kategori dapat digunakan oleh banyak listing makanan |
 | `merchant_profiles` | `food_listings` | 1 : N | Satu merchant dapat memposting banyak listing makanan |
 | `users` | `orders` | 1 : N | Satu user dapat membuat banyak pesanan |
 | `merchant_profiles` | `orders` | 1 : N | Satu merchant dapat menerima banyak pesanan |
 | `orders` | `order_items` | 1 : N | Satu pesanan berisi satu atau lebih item |
 | `food_listings` | `order_items` | 1 : N | Satu listing dapat muncul di banyak pesanan berbeda |
+| `orders` | `payments` | 1 : N | Satu pesanan dapat memiliki beberapa record pembayaran (retry) |
 | `merchant_profiles` | `merchant_verifications` | 1 : N | Satu merchant bisa memiliki riwayat beberapa kali verifikasi |
 | `users` (admin) | `merchant_verifications` | 1 : N | Satu admin dapat menangani banyak verifikasi |
-| `orders` | `reviews` | 1 : 0..1 | Satu pesanan hanya menghasilkan satu ulasan |
-| `users` | `reviews` | 1 : N | Satu user dapat menulis banyak ulasan |
-| `merchant_profiles` | `reviews` | 1 : N | Satu merchant dapat menerima banyak ulasan |
+
+---
+
+## Indeks yang Direkomendasikan
+
+| Tabel | Nama Index | Kolom | Alasan |
+|---|---|---|---|
+| `users` | `idx_users_email` | `email` | Login lookup — query paling sering, harus cepat |
+| `users` | `idx_users_deleted_at` | `deleted_at` | Filter soft delete pada semua query aktif |
+| `merchant_profiles` | `idx_mp_user_id` | `user_id` | FK lookup JOIN users ↔ merchant_profiles |
+| `merchant_profiles` | `idx_mp_verification_status` | `verification_status` | Filter dashboard admin — list merchant pending |
+| `merchant_profiles` | `idx_mp_location` | `latitude, longitude` | Geo query — cari merchant terdekat |
+| `categories` | `idx_categories_name` | `name` | Lookup dan search kategori |
+| `food_listings` | `idx_fl_merchant_status` | `merchant_id, status` | Query listing aktif per merchant (paling sering) |
+| `food_listings` | `idx_fl_category_status` | `category_id, status` | Filter listing berdasarkan kategori |
+| `food_listings` | `idx_fl_pickup_end` | `pickup_end` | Cari listing yang belum kadaluarsa (`pickup_end > NOW()`) |
+| `food_listings` | `idx_fl_deleted_at` | `deleted_at` | Filter soft delete listing |
+| `orders` | `idx_orders_user_id` | `user_id` | Riwayat pesanan per user |
+| `orders` | `idx_orders_merchant_status` | `merchant_id, status` | Dashboard merchant — pesanan masuk per status |
+| `orders` | `idx_orders_expires_at_status` | `expires_at, status` | Cron job expire — cari order pending yang sudah melewati batas |
+| `payments` | `idx_payments_order_id` | `order_id` | Lookup semua attempt pembayaran per pesanan |
+| `payments` | `idx_payments_transaction_id` | `transaction_id` | Webhook callback dari gateway |
+| `merchant_verifications` | `idx_mv_merchant_id` | `merchant_id` | Riwayat verifikasi per merchant |
