@@ -1,190 +1,203 @@
-# Data Dictionary — EcoEats
+# Panduan Setup Backend EcoEats (Laravel 11)
+
+> Dokumen ini adalah panduan resmi setup backend untuk proyek EcoEats.
+> Semua anggota tim **wajib** mengikuti langkah ini agar environment konsisten.
+> Letakkan file ini di `docs/setup-backend.md` pada repo.
 
 ---
 
-## Tabel: `users`
+## Prasyarat
 
-Menyimpan semua akun pengguna platform (user biasa, merchant, dan admin). Peran dibedakan menggunakan kolom `role`.
+Pastikan semua anggota tim menggunakan versi yang **sama persis**:
 
-| Kolom | Tipe Data | Constraint | Keterangan |
-|---|---|---|---|
-| `id` | INT | PK, AUTO_INCREMENT | ID unik pengguna |
-| `name` | VARCHAR(100) | NOT NULL | Nama lengkap pengguna |
-| `email` | VARCHAR(255) | UNIQUE, NOT NULL | Email untuk login dan notifikasi |
-| `password_hash` | VARCHAR(255) | NOT NULL | Password yang di-hash menggunakan bcrypt (cost factor ≥ 10) |
-| `phone` | VARCHAR(20) | NULL | Nomor HP (opsional, untuk notifikasi) |
-| `role` | ENUM('user', 'merchant', 'admin') | NOT NULL, DEFAULT 'user' | Peran pengguna dalam sistem |
-| `created_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP | Waktu akun dibuat |
-| `updated_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | Waktu terakhir data diperbarui |
-| `deleted_at` | TIMESTAMP | NULL | Soft delete — NULL berarti aktif. Diisi timestamp saat akun dihapus. Semua query aktif **wajib** filter `WHERE deleted_at IS NULL` |
+| Tools | Versi yang Digunakan |
+|---|---|
+| PHP | 8.2.x |
+| Composer | 2.x |
+| Laravel | 11.x |
+| MySQL | 8.0.x (via XAMPP) |
+| XAMPP | 8.2.x |
+| Node.js | 20.x LTS (untuk Vite asset) |
 
----
-
-## Tabel: `categories` 
-
-Menyimpan daftar kategori makanan yang digunakan oleh `food_listings`. Menggantikan kolom `category VARCHAR` bebas di v1 untuk menjamin konsistensi data dan kemudahan filtering.
-
-| Kolom | Tipe Data | Constraint | Keterangan |
-|---|---|---|---|
-| `id` | INT | PK, AUTO_INCREMENT | ID unik kategori |
-| `name` | VARCHAR(80) | UNIQUE, NOT NULL | Nama kategori makanan, misal: Nasi & Mie, Roti & Kue, Minuman. UNIQUE mencegah duplikasi |
-| `created_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP | Waktu kategori dibuat |
+> Cek versi PHP kamu: `php -v`
+> Cek versi Composer: `composer -V`
+> Jika belum install, download XAMPP di https://www.apachefriends.org
 
 ---
 
-## Tabel: `merchant_profiles`
+## Langkah 1 — Clone Repository
 
-Menyimpan informasi detail dan status verifikasi mitra merchant. Setiap merchant memiliki tepat satu profil (relasi 1:1 dengan `users`).
-
-| Kolom | Tipe Data | Constraint | Keterangan |
-|---|---|---|---|
-| `id` | INT | PK, AUTO_INCREMENT | ID unik profil merchant |
-| `user_id` | INT | FK → users.id, UNIQUE, NOT NULL | Referensi ke akun pengguna. UNIQUE memastikan 1 user hanya punya 1 profil merchant |
-| `business_name` | VARCHAR(150) | NOT NULL | Nama usaha kuliner |
-| `business_address` | TEXT | NOT NULL | Alamat lengkap tempat usaha |
-| `latitude` | DECIMAL(10,7) | NOT NULL, CHECK(-90 ≤ value ≤ 90) | Koordinat lintang lokasi merchant. Validasi range wajib diterapkan di level aplikasi dan DB |
-| `longitude` | DECIMAL(10,7) | NOT NULL, CHECK(-180 ≤ value ≤ 180) | Koordinat bujur lokasi merchant. Validasi range wajib diterapkan di level aplikasi dan DB |
-| `business_license_url` | VARCHAR(500) | NULL | URL file foto surat izin usaha yang diunggah |
-| `halal_cert_url` | VARCHAR(500) | NULL | URL file sertifikat halal (jika ada) |
-| `verification_status` | ENUM('pending', 'approved', 'rejected') | NOT NULL, DEFAULT 'pending' | Status verifikasi dokumen oleh admin |
-| `verified_at` | TIMESTAMP | NULL | Waktu akun merchant disetujui admin |
-| `created_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP | Waktu profil dibuat |
+```bash
+git clone <url-repo-tim>
+cd PrakRpl
+```
 
 ---
 
-## Tabel: `food_listings`
+## Langkah 2 — Inisialisasi Project Laravel
 
-Menyimpan daftar makanan surplus yang dipublikasikan oleh merchant.
+Buat project Laravel baru di dalam folder `src/backend/`:
 
-| Kolom | Tipe Data | Constraint | Keterangan |
-|---|---|---|---|
-| `id` | INT | PK, AUTO_INCREMENT | ID unik listing makanan |
-| `merchant_id` | INT | FK → merchant_profiles.id, NOT NULL | Referensi ke profil merchant pemilik listing |
-| `category_id` | INT | FK → categories.id, NOT NULL | Menggantikan kolom `category VARCHAR(50)` bebas. Referensi ke tabel `categories` |
-| `name` | VARCHAR(150) | NOT NULL | Nama produk makanan surplus |
-| `description` | TEXT | NULL | Deskripsi singkat produk |
-| `original_price` | DECIMAL(10,2) | NOT NULL | Harga normal produk sebelum diskon |
-| `discount_price` | DECIMAL(10,2) | NOT NULL | Harga jual surplus (harga diskon) |
-| `stock_qty` | INT | NOT NULL, DEFAULT 0 | Jumlah stok tersedia saat ini |
-| `photo_url` | VARCHAR(500) | NULL | URL foto produk yang diunggah merchant |
-| `pickup_start` | TIMESTAMP | NOT NULL | Waktu mulai pengambilan tersedia |
-| `pickup_end` | TIMESTAMP | NOT NULL | Batas waktu pengambilan (deadline) |
-| `status` | ENUM('available', 'unavailable', 'sold_out') | NOT NULL, DEFAULT 'available' | Status ketersediaan listing |
-| `created_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP | Waktu listing dibuat |
-| `updated_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | Waktu terakhir listing diperbarui |
-| `deleted_at` | TIMESTAMP | NULL | Soft delete listing. NULL = aktif. Query aktif wajib filter `WHERE deleted_at IS NULL` |
+```bash
+composer create-project laravel/laravel src/backend "^11.0"
+cd src/backend
+```
+
+> **Catatan:** Jika repo sudah ada folder `src/backend/`, skip langkah ini dan langsung ke Langkah 3.
 
 ---
 
-## Tabel: `orders`
+## Langkah 3 — Konfigurasi File `.env`
 
-Menyimpan transaksi pemesanan yang dilakukan user kepada merchant.
+Salin file `.env.example` menjadi `.env`:
 
-| Kolom | Tipe Data | Constraint | Keterangan |
-|---|---|---|---|
-| `id` | INT | PK, AUTO_INCREMENT | ID unik pesanan |
-| `user_id` | INT | FK → users.id, NOT NULL | Referensi ke pengguna yang memesan |
-| `merchant_id` | INT | FK → merchant_profiles.id, NOT NULL | Referensi ke merchant yang menerima pesanan |
-| `pickup_code` | VARCHAR(10) | UNIQUE, NOT NULL | Kode unik pengambilan yang diberikan ke user setelah checkout |
-| `status` | ENUM('pending', 'confirmed', 'ready', 'completed', 'rejected', 'expired') | NOT NULL, DEFAULT 'pending' | Status pesanan saat ini |
-| `total_amount` | DECIMAL(10,2) | NOT NULL | Total harga yang dibayarkan user |
-| `payment_method` | ENUM('transfer', 'ewallet', 'cash', 'qris') | NOT NULL | Metode pembayaran. Diubah dari VARCHAR bebas ke ENUM untuk mencegah data kotor |
-| `ordered_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP | Waktu pesanan dibuat |
-| `expires_at` | TIMESTAMP | NOT NULL | Deadline konfirmasi merchant. Jika terlampaui dan status masih `pending`, scheduler mengubah status ke `expired` |
-| `confirmed_at` | TIMESTAMP | NULL | Waktu merchant mengkonfirmasi pesanan |
-| `completed_at` | TIMESTAMP | NULL | Waktu pesanan selesai (pickup berhasil) |
-| `rejected_at` | TIMESTAMP | NULL | Waktu merchant menolak pesanan. Diisi saat status berubah ke `rejected` |
-| `expired_at` | TIMESTAMP | NULL | Waktu pesanan kadaluarsa secara aktual. Diisi oleh scheduler saat status diubah ke `expired` |
-| `updated_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP | Waktu terakhir record diperbarui |
+```bash
+cp .env.example .env
+```
 
-> **Catatan:** Kolom `payment_status` dihapus dari tabel ini dan dipindahkan ke tabel `payments` yang lebih lengkap.
+Kemudian generate application key:
 
----
+```bash
+php artisan key:generate
+```
 
-## Tabel: `payments` 
+Edit file `.env` dan sesuaikan nilai berikut dengan environment lokal kamu:
 
-Menyimpan riwayat attempt pembayaran untuk setiap pesanan. Dipisahkan dari `orders` agar mendukung multi-gateway (Midtrans, Xendit, manual), retry pembayaran, dan audit riwayat.
+```
+DB_DATABASE=ecoeats
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-| Kolom | Tipe Data | Constraint | Keterangan |
-|---|---|---|---|
-|  `id` | INT | PK, AUTO_INCREMENT | ID unik record pembayaran |
-|  `order_id` | INT | FK → orders.id, NOT NULL | Referensi ke pesanan terkait. Satu order dapat memiliki lebih dari satu record (retry) |
-|  `payment_gateway` | VARCHAR(50) | NOT NULL | Nama gateway yang digunakan, misal: `midtrans`, `xendit`, `manual` |
-|  `transaction_id` | VARCHAR(255) | NULL | ID transaksi dari pihak payment gateway. NULL jika pembayaran manual atau belum diproses |
-|  `amount` | DECIMAL(10,2) | NOT NULL | Nominal yang dibayarkan pada attempt ini |
-|  `status` | ENUM('pending', 'paid', 'failed', 'refunded', 'expired') | NOT NULL, DEFAULT 'pending' | Status pembayaran pada attempt ini |
-|  `payment_proof_url` | VARCHAR(500) | NULL | URL bukti transfer untuk metode manual. NULL jika menggunakan gateway otomatis |
-|  `paid_at` | TIMESTAMP | NULL | Waktu pembayaran dikonfirmasi berhasil. NULL jika belum lunas |
-|  `expired_at` | TIMESTAMP | NULL | Batas waktu pembayaran dari gateway. NULL jika tidak ada batas dari gateway |
-|  `created_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP | Waktu attempt pembayaran dibuat |
+> **XAMPP default:** username `root`, password kosong.
+> Jangan pernah commit file `.env` ke repo!
 
 ---
 
-## Tabel: `order_items`
+## Langkah 4 — Buat Database di XAMPP
 
-Junction table antara `orders` dan `food_listings`. Satu pesanan dapat berisi banyak item makanan.
-
-| Kolom | Tipe Data | Constraint | Keterangan |
-|---|---|---|---|
-| `id` | INT | PK, AUTO_INCREMENT | ID unik record item pesanan |
-| `order_id` | INT | FK → orders.id, NOT NULL | Referensi ke pesanan induk |
-| `food_listing_id` | INT | FK → food_listings.id, NOT NULL | Referensi ke listing makanan yang dipesan |
-| `listing_name` | VARCHAR(150) | NOT NULL | Snapshot nama produk saat transaksi. Mencegah data historis rusak jika listing diubah atau di-soft-delete |
-| `quantity` | INT | NOT NULL, DEFAULT 1 | Jumlah porsi yang dipesan |
-| `unit_price` | DECIMAL(10,2) | NOT NULL | Harga satuan pada saat transaksi (snapshot harga) |
-| `subtotal` | DECIMAL(10,2) | NOT NULL | Hasil perkalian quantity × unit_price |
+1. Buka XAMPP Control Panel, start **Apache** dan **MySQL**
+2. Buka browser, akses `http://localhost/phpmyadmin`
+3. Klik **New** di sidebar kiri
+4. Buat database baru dengan nama: `ecoeats`
+5. Collation: `utf8mb4_unicode_ci`
+6. Klik **Create**
 
 ---
 
-## Tabel: `merchant_verifications`
+## Langkah 5 — Install Dependencies
 
-Menyimpan log riwayat keputusan verifikasi yang dilakukan admin terhadap pengajuan merchant. Mendukung audit trail.
-
-| Kolom | Tipe Data | Constraint | Keterangan |
-|---|---|---|---|
-| `id` | INT | PK, AUTO_INCREMENT | ID unik record verifikasi |
-| `merchant_id` | INT | FK → merchant_profiles.id, NOT NULL | Referensi ke profil merchant yang diajukan |
-| `admin_id` | INT | FK → users.id, NOT NULL | Referensi ke akun admin (role = admin) yang mengambil keputusan |
-| `action` | ENUM('approved', 'rejected') | NOT NULL | Keputusan admin: disetujui atau ditolak |
-| `notes` | TEXT | NULL | Catatan atau alasan keputusan dari admin |
-| `actioned_at` | TIMESTAMP | NOT NULL, DEFAULT CURRENT_TIMESTAMP | Waktu keputusan diambil |
+```bash
+cd src/backend
+composer install
+npm install
+```
 
 ---
 
-## Ringkasan Relasi Antar Tabel
+## Langkah 6 — Jalankan Migrasi
 
-| Dari | Ke | Kardinalitas | Keterangan |
-|---|---|---|---|
-| `users` | `merchant_profiles` | 1 : 0..1 | Satu user (merchant) memiliki nol atau satu profil merchant |
-| `categories` | `food_listings` | 1 : N | Satu kategori dapat digunakan oleh banyak listing makanan |
-| `merchant_profiles` | `food_listings` | 1 : N | Satu merchant dapat memposting banyak listing makanan |
-| `users` | `orders` | 1 : N | Satu user dapat membuat banyak pesanan |
-| `merchant_profiles` | `orders` | 1 : N | Satu merchant dapat menerima banyak pesanan |
-| `orders` | `order_items` | 1 : N | Satu pesanan berisi satu atau lebih item |
-| `food_listings` | `order_items` | 1 : N | Satu listing dapat muncul di banyak pesanan berbeda |
-| `orders` | `payments` | 1 : N | Satu pesanan dapat memiliki beberapa record pembayaran (retry) |
-| `merchant_profiles` | `merchant_verifications` | 1 : N | Satu merchant bisa memiliki riwayat beberapa kali verifikasi |
-| `users` (admin) | `merchant_verifications` | 1 : N | Satu admin dapat menangani banyak verifikasi |
+Pastikan XAMPP MySQL sudah running, lalu jalankan:
+
+```bash
+php artisan migrate
+```
+
+Output yang diharapkan:
+
+```
+INFO  Running migrations.
+  2024_01_01_000001_create_users_table ............. DONE
+  2024_01_01_000002_create_categories_table ........ DONE
+  2024_01_01_000003_create_merchant_profiles_table . DONE
+  2024_01_01_000004_create_food_listings_table ..... DONE
+  2024_01_01_000005_create_orders_table ............ DONE
+  2024_01_01_000006_create_payments_table .......... DONE
+  2024_01_01_000007_create_order_items_table ........ DONE
+  2024_01_01_000008_create_merchant_verifications_table . DONE
+```
+
+Jika ada error koneksi, pastikan:
+- MySQL di XAMPP sudah running (lampu hijau)
+- Nilai `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME` di `.env` sudah benar
 
 ---
 
-## Indeks yang Direkomendasikan
+## Langkah 7 — Jalankan Development Server
 
-| Tabel | Nama Index | Kolom | Alasan |
-|---|---|---|---|
-| `users` | `idx_users_email` | `email` | Login lookup — query paling sering, harus cepat |
-| `users` | `idx_users_deleted_at` | `deleted_at` | Filter soft delete pada semua query aktif |
-| `merchant_profiles` | `idx_mp_user_id` | `user_id` | FK lookup JOIN users ↔ merchant_profiles |
-| `merchant_profiles` | `idx_mp_verification_status` | `verification_status` | Filter dashboard admin — list merchant pending |
-| `merchant_profiles` | `idx_mp_location` | `latitude, longitude` | Geo query — cari merchant terdekat |
-| `categories` | `idx_categories_name` | `name` | Lookup dan search kategori |
-| `food_listings` | `idx_fl_merchant_status` | `merchant_id, status` | Query listing aktif per merchant (paling sering) |
-| `food_listings` | `idx_fl_category_status` | `category_id, status` | Filter listing berdasarkan kategori |
-| `food_listings` | `idx_fl_pickup_end` | `pickup_end` | Cari listing yang belum kadaluarsa (`pickup_end > NOW()`) |
-| `food_listings` | `idx_fl_deleted_at` | `deleted_at` | Filter soft delete listing |
-| `orders` | `idx_orders_user_id` | `user_id` | Riwayat pesanan per user |
-| `orders` | `idx_orders_merchant_status` | `merchant_id, status` | Dashboard merchant — pesanan masuk per status |
-| `orders` | `idx_orders_expires_at_status` | `expires_at, status` | Cron job expire — cari order pending yang sudah melewati batas |
-| `payments` | `idx_payments_order_id` | `order_id` | Lookup semua attempt pembayaran per pesanan |
-| `payments` | `idx_payments_transaction_id` | `transaction_id` | Webhook callback dari gateway |
-| `merchant_verifications` | `idx_mv_merchant_id` | `merchant_id` | Riwayat verifikasi per merchant |
+```bash
+php artisan serve
+```
+
+Akses di browser: `http://localhost:8000`
+
+---
+
+## Langkah 8 — Verifikasi Skema Database
+
+Setelah migrasi berhasil, buka phpMyAdmin dan pastikan tabel berikut sudah terbentuk:
+
+- `users`
+- `categories`
+- `merchant_profiles`
+- `food_listings`
+- `orders`
+- `payments`
+- `order_items`
+- `merchant_verifications`
+- `migrations` (tabel internal Laravel)
+
+---
+
+## Struktur Folder src/backend yang Relevan
+
+```
+src/backend/
+├── app/
+│   └── Models/          ← Model Eloquent akan dibuat di sini
+├── database/
+│   └── migrations/      ← Semua file migrasi ada di sini
+├── routes/
+│   ├── api.php          ← Endpoint API didefinisikan di sini
+│   └── web.php
+├── .env                 ← JANGAN dicommit! (ada di .gitignore)
+├── .env.example         ← Template env — wajib dicommit
+└── .gitignore
+```
+
+---
+
+## Alur Git untuk Task Ini (PR Setup)
+
+```bash
+# 1. Buat branch baru dari dev
+git checkout dev
+git pull origin dev
+git checkout -b setup/project-init
+
+# 2. Tambahkan file yang dibutuhkan
+#    - src/backend/ (seluruh project Laravel, kecuali .env & vendor)
+#    - .gitignore (pastikan .env dan vendor/ sudah masuk)
+#    - docs/setup-backend.md (file ini)
+
+# 3. Commit
+git add .
+git commit -m "feat: initialize Laravel 11 backend with database migrations"
+
+# 4. Push dan buka PR ke branch dev
+git push origin setup/project-init
+```
+
+Buka PR di GitHub ke branch `dev` (bukan `main`), lalu minta review dari anggota tim.
+
+---
+
+## Troubleshooting Umum
+
+| Masalah | Solusi |
+|---|---|
+| `php: command not found` | Tambahkan path PHP XAMPP ke environment variable sistem |
+| `SQLSTATE: Connection refused` | Pastikan MySQL di XAMPP sudah running |
+| `Target class [xxxController] does not exist` | Jalankan `composer dump-autoload` |
+| `No application encryption key has been specified` | Jalankan `php artisan key:generate` |
+| Migrasi error kolom sudah ada | Jalankan `php artisan migrate:fresh` (hati-hati: hapus semua data!) |
