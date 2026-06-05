@@ -113,10 +113,12 @@ app/
 │   │   │   ├── UserController.php           ← daftar user, soft delete toggle
 │   │   │   ├── FoodListingController.php    ← read-only + force delete
 │   │   │   ├── AccountController.php        ← tambah akun manual, reset verifikasi
+│   │   │   ├── OrderController.php          ← BARU — monitoring pesanan, read-only
 │   │   │   └── CategoryController.php       ← CRUD kategori
 │   │   ├── Merchant/
 │   │   │   ├── DashboardController.php      ← stats merchant, recent listings
 │   │   │   ├── FoodListingController.php    ← CRUD listing, upload foto
+│   │   │   ├── OrderController.php          ← BARU — confirm, reject, markReady, complete
 │   │   │   └── ProfileController.php        ← edit profil usaha, upload dokumen
 │   │   └── Api/                             ← untuk mobile, belum diisi
 │   └── Middleware/
@@ -151,8 +153,11 @@ resources/views/
 │   │   └── index.blade.php                  ← filter status+kategori, force delete
 │   ├── accounts/
 │   │   └── create.blade.php                 ← form dinamis, field merchant muncul jika role merchant
-│   └── categories/
-│       └── index.blade.php                  ← list + inline edit + form tambah
+│   ├── categories/
+│   │   └── index.blade.php                  ← list + inline edit + form tambah
+│   └── orders/
+│       ├── index.blade.php   ← BARU — monitoring semua pesanan, filter status+search
+│       └── show.blade.php    ← BARU — detail pesanan read-only, timeline status
 └── merchant/
     ├── food-listings/
     │   ├── index.blade.php                  ← grid card, discount %, action buttons
@@ -160,6 +165,9 @@ resources/views/
     │   └── edit.blade.php                   ← pre-filled, bisa ganti foto
     └── profile/
         └── edit.blade.php                   ← edit profil usaha + upload ulang dokumen
+   └── orders/
+        ├── index.blade.php   ← BARU — daftar pesanan masuk, card layout, reject modal
+        └── show.blade.php    ← BARU — detail + aksi (confirm/reject/ready/complete + verifik
 ```
 
 ---
@@ -227,6 +235,13 @@ Dua sistem auth berjalan paralel, tidak saling mengganggu.
 
 **Views Auth:** login (3 portal), register user, register merchant
 
+- **Order model** dengan pickup code auto-generator di `boot()` — 8 karakter alphanumeric, tanpa 0/O/1/I, loop sampai unik
+- **Merchant order flow** — konfirmasi, tolak (dengan alasan wajib + kembalikan stok), tandai ready, complete dengan verifikasi kode pickup
+- **Admin order monitoring** — lihat semua pesanan platform, filter status, search kode/user/merchant, detail pesanan
+- **Merchant dashboard stats** — `pending_orders` dan `completed_today` sudah aktif dari DB
+- **Sidenav merchant** — semua halaman merchant sudah punya link Pesanan Masuk dengan badge merah jika ada pending
+- **Sidenav admin** — semua halaman admin sudah punya link Semua Pesanan
+
 **Fitur yang sudah jalan:**
 - Multi-portal login (user/merchant/admin) dengan validasi role dan cek soft delete
 - Registrasi user (langsung aktif) dan merchant (langsung pending)
@@ -245,17 +260,11 @@ Dua sistem auth berjalan paralel, tidak saling mengganggu.
 
 Urutan yang disarankan:
 
-1. **Order flow** — ini yang paling dibutuhkan. Model `Order` dan `OrderItem` belum dibuat. Alurnya: user pesan lewat mobile → merchant terima notifikasi di web → merchant konfirmasi atau tolak → status berubah (confirmed → ready → completed) → user pickup dengan kode unik. Halaman yang perlu dibuat: pesanan masuk untuk merchant, riwayat pesanan, update status.
-
-2. **Riwayat & pendapatan merchant** — ringkasan pesanan selesai, total pendapatan, saldo yang bisa dicairkan.
-
-3. **Withdrawal merchant** — merchant ajukan pencairan saldo, admin approve/reject dan upload bukti transfer. Tabel `withdrawals` sudah ada di DB.
-
-4. **API mobile** — endpoint Sanctum untuk login, listing, dan order. Dikerjakan setelah order flow web selesai agar konsisten.
-
-5. **Peta lokasi merchant** — FR-07, belum diputuskan pakai Google Maps atau Leaflet.
-
-6. **Review & rating** — FR-14, prioritas Low di SRS.
+1. **API mobile** — endpoint Sanctum: login user, daftar listing, create order (pakai `Order::generatePickupCode()` yang sudah ada). Ini prioritas utama karena order flow web sudah selesai.
+2. **Withdrawal merchant** — tabel `withdrawals` sudah ada di DB, belum ada controller/view sama sekali. Alur: merchant ajukan pencairan → admin approve/reject + upload bukti transfer.
+3. **Riwayat & pendapatan merchant** — halaman ringkasan pesanan selesai, total pendapatan bulan ini, saldo yang bisa dicairkan (dihitung dari payments paid - withdrawals completed).
+4. **Peta lokasi merchant** — FR-07, belum diputuskan Google Maps atau Leaflet/OpenStreetMap.
+5. **Review & rating** — FR-14, prioritas Low di SRS.
 
 ---
 
@@ -266,5 +275,25 @@ Tiga akun sudah ada di DB:
 | Email | Password | Role |
 |---|---|---|
 | `user@test.com` | `password` | user |
-| `merchant@test.com` | `password` | merchant |
+| `SPPG@test.com` | `password` | merchant |
 | `admin@test.com` | `password` | admin |
+
+## Catatan Teknis Tambahan
+ 
+**Order model — hal penting:**
+- `CREATED_AT = 'ordered_at'` (bukan `created_at` standar)
+- Pickup code: 8 karakter dari charset `ABCDEFGHJKLMNPQRSTUVWXYZ23456789`
+- Stok dikembalikan saat merchant reject pesanan (loop `$order->items`, `increment('stock_qty', $item->quantity)`)
+- Admin hanya bisa monitor — tidak bisa ubah status pesanan
+**Merchant order controller — alur status:**
+```
+pending → confirm()  → confirmed
+pending → reject()   → rejected  (stok dikembalikan)
+confirmed → markReady() → ready
+ready → complete()   → completed (butuh input pickup_code dari user, dicocokkan case-insensitive)
+```
+ 
+**Route order yang sudah ada:**
+```
+merchant.orders.index / show / confirm / reject / ready / complete
+admin.orders.index / show
