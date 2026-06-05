@@ -1,4 +1,4 @@
-# EcoEats — Project Context untuk Sesi AI Baru
+# EcoEats — Project Context untuk Sesi Sebelumnya(Pesanan)
 
 Dokumen ini dibaca bersama file-file yang dilampirkan (SRS, SQL schema/data dictionary, dan web.php). Jangan duplikasi informasi dari file tersebut — dokumen ini hanya mencakup hal yang tidak ada di sana: stack teknis, konvensi kode, progress, dan struktur folder lengkap.
 
