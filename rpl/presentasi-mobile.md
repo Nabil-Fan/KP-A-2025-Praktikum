@@ -1,122 +1,101 @@
 # Script Presentasi — EcoEats Mobile (Android)
-# Durasi: 8 menit
-# Format: per slide, narasi lengkap
+# Pertemuan ke-15 | Durasi: maks. 8 menit
 
 ---
 
-## SLIDE 1 — Opening & Identitas Proyek
-**Durasi: ~45 detik**
+## SLIDE 1 — Pembukaan
+**~20 detik**
 
-Selamat pagi/siang/sore. Pada kesempatan ini kami akan mempresentasikan sisi mobile dari platform EcoEats — sebuah aplikasi Android yang menjadi ujung tombak pengalaman pengguna dalam menemukan dan memesan makanan surplus di Kota Solo.
-
-Perlu kami sampaikan di awal bahwa EcoEats adalah sistem yang terdiri dari dua sisi: sisi web yang digunakan oleh merchant dan admin — yang sudah dipresentasikan sebelumnya — dan sisi mobile Android yang kami bangun khusus untuk konsumen pembeli. Hari ini kami akan fokus pada sisi mobile ini.
+Selamat [pagi/siang/sore]. Kami akan menyampaikan update progress pengembangan sisi mobile EcoEats — aplikasi Android untuk konsumen pembeli makanan surplus di platform EcoEats.
 
 ---
 
-## SLIDE 2 — Mengapa Mobile?
-**Durasi: ~45 detik**
+## SLIDE 2 — Gambaran Singkat Peran Mobile dalam EcoEats
+**~40 detik**
 
-Keputusan untuk menempatkan pengalaman user di mobile bukan keputusan sembarangan. Ada alasan teknis dan UX yang kuat di baliknya.
+Sebelum masuk ke progress, sedikit konteks. EcoEats terdiri dari dua platform: web untuk merchant dan admin, dan Android untuk konsumen pembeli. Pembagian ini disengaja karena kebutuhan konsumen — GPS, notifikasi, browsing saat bergerak — lebih optimal di aplikasi mobile native.
 
-Pertama, konsumen EcoEats adalah orang yang sedang bergerak — mereka browsing makanan sambil di perjalanan, membutuhkan akses lokasi untuk menemukan merchant terdekat, dan butuh notifikasi real-time saat pesanan mereka siap diambil. Semua kebutuhan ini hanya bisa dipenuhi secara optimal oleh aplikasi mobile native.
-
-Kedua, fitur peta interaktif dengan geolocation, kalkulasi jarak terdekat, dan navigasi ke lokasi merchant adalah fitur yang jauh lebih powerful di mobile dibanding web. Inilah mengapa kami memisahkan domain user sepenuhnya ke Android.
+Aplikasi Android ini dibangun dengan Kotlin, berkomunikasi ke backend Laravel menggunakan Retrofit, dan autentikasi menggunakan Sanctum token yang sama dengan yang dipakai sisi web.
 
 ---
 
-## SLIDE 3 — Tech Stack Mobile
-**Durasi: ~40 detik**
+## SLIDE 3 — Status Progress (Done / On Going / Next Step)
+**~90 detik**
 
-Aplikasi mobile EcoEats dibangun menggunakan Kotlin sebagai bahasa utama, yang merupakan bahasa resmi Android modern yang direkomendasikan Google. Untuk komunikasi dengan backend Laravel, kami menggunakan Retrofit — library HTTP client yang sudah menjadi standar industri untuk aplikasi Android.
+Berikut status progress pengembangan mobile hingga pertemuan ke-15 ini.
 
-Autentikasi menggunakan Laravel Sanctum dengan mekanisme token-based, sehingga setiap request dari mobile membawa token yang diverifikasi oleh server. Untuk dokumentasi API, backend sudah menyiapkan Scramble yang dapat diakses di endpoint docs/api, sehingga tim mobile dan tim backend bisa bekerja dengan kontrak API yang jelas.
+**Yang sudah selesai:**
+Sistem autentikasi sudah selesai dan terverifikasi berjalan end-to-end. User bisa login dengan email dan password, token Sanctum dikembalikan backend dan disimpan di SharedPreferences, setiap request selanjutnya sudah ter-autentikasi secara otomatis. Logout juga sudah berjalan — token dihapus dari perangkat dan dicabut dari sisi server. Integrasi Android ke Laravel untuk autentikasi ini sudah solid.
 
----
+**Yang sedang dikerjakan:**
+Saat ini kami sedang mengerjakan halaman katalog listing — menampilkan daftar makanan surplus aktif dari seluruh merchant dengan data dari API. Struktur Retrofit untuk endpoint listing sudah dibuat, UI sedang dalam proses.
 
-## SLIDE 4 — Arsitektur Sistem: Mobile ↔ Backend
-**Durasi: ~50 detik**
-
-Sebelum masuk ke fitur, penting untuk memahami bagaimana mobile dan backend berkomunikasi.
-
-Aplikasi Android berkomunikasi dengan Laravel melalui REST API di routes/api.php. Setiap request dilengkapi header Authorization Bearer token yang diperoleh saat proses login. Backend memvalidasi token via Sanctum, mengambil data dari database, dan mengembalikan response dalam format JSON yang kemudian di-parse oleh Retrofit di sisi Android.
-
-Arsitektur ini memastikan pemisahan yang bersih antara presentation layer di Android dan business logic di Laravel. Tim mobile tidak perlu tahu detail implementasi backend, cukup mengikuti kontrak API yang sudah didokumentasikan. Demikian pula sebaliknya — tim backend tidak perlu tahu bagaimana Android merender data yang dikirimkan.
-
-Ini adalah pola arsitektur yang scalable — ke depannya jika ada platform lain seperti iOS atau web user, mereka cukup mengonsumsi API yang sama tanpa perubahan pada backend.
+**Next step hingga pertemuan 15/16:**
+Target kami hingga akhir adalah menyelesaikan flow utama secara end-to-end: katalog listing bisa dibuka dan menampilkan data real dari backend, dilanjutkan fitur peta untuk melihat lokasi merchant, kemudian sistem pemesanan beserta kode pickup, dan riwayat pesanan. Prioritas utama adalah katalog dan peta karena keduanya adalah entry point utama pengalaman user.
 
 ---
 
-## SLIDE 5 — Fitur Autentikasi (Sudah Implementasi)
-**Durasi: ~60 detik**
+## SLIDE 4 — Kendala yang Dihadapi
+**~70 detik**
 
-Fondasi dari seluruh aplikasi mobile adalah sistem autentikasi, dan inilah yang sudah berhasil kami implementasikan dan verifikasi end-to-end.
+Ada beberapa kendala yang kami hadapi selama pengembangan mobile ini.
 
-Alurnya adalah sebagai berikut: user membuka aplikasi, memasukkan email dan password, lalu Retrofit mengirim request POST ke endpoint /api/auth/login di backend Laravel. Backend memvalidasi kredensial, memverifikasi bahwa akun aktif dan memiliki role user, kemudian mengembalikan Sanctum token dalam format JSON.
+Pertama, kurva belajar Kotlin dan ekosistem Android cukup curam, terutama untuk anggota tim yang sebelumnya lebih familiar dengan pengembangan web. Setup environment Android Studio, pengelolaan dependency Gradle, dan pola arsitektur Android membutuhkan waktu adaptasi yang tidak sedikit.
 
-Token ini disimpan secara persisten di perangkat menggunakan SharedPreferences, sehingga user tidak perlu login ulang setiap membuka aplikasi. Setiap request berikutnya — baik untuk mengambil listing, membuat pesanan, maupun melihat riwayat — secara otomatis menyertakan token ini di header Authorization.
+Kedua, sinkronisasi dengan tim backend. Karena mobile dan web dikerjakan secara paralel, ada beberapa titik di mana endpoint API yang dibutuhkan mobile belum siap saat tim Android sudah butuh. Ini menyebabkan beberapa bagian harus dikerjakan dengan data dummy dulu sambil menunggu endpoint tersedia.
 
-Proses logout menghapus token dari perangkat dan memanggil endpoint /api/auth/logout di backend untuk mencabut token dari sisi server, memastikan keamanan dari dua arah.
+Ketiga, pengembangan aplikasi mobile secara natural lebih lambat dibanding web karena setiap perubahan butuh build ulang dan testing di emulator atau perangkat fisik. Ini berdampak pada kecepatan iterasi dibanding tim web.
 
-Yang menjadi poin penting: integrasi frontend Android dengan backend Laravel untuk autentikasi ini sudah berjalan sempurna. Request masuk, token dikeluarkan, token disimpan, request berikutnya authenticated — seluruh alur ini sudah terverifikasi berfungsi.
-
----
-
-## SLIDE 6 — Fitur yang Sedang Dikembangkan
-**Durasi: ~55 detik**
-
-Di atas fondasi autentikasi yang sudah solid, kami sedang mengembangkan fitur-fitur berikut secara paralel.
-
-Yang pertama adalah katalog makanan surplus — user dapat melihat daftar semua listing aktif dari merchant yang sudah terverifikasi, dilengkapi foto, nama, harga diskon, persentase diskon, dan sisa stok. User juga bisa filter berdasarkan kategori.
-
-Yang kedua adalah fitur peta interaktif menggunakan Leaflet Android atau Google Maps SDK — menampilkan pin lokasi merchant di sekitar user, memanfaatkan GPS perangkat untuk menghitung jarak terdekat, dan memberikan navigasi ke lokasi pickup.
-
-Yang ketiga adalah sistem pemesanan — user dapat menambahkan item ke keranjang, memilih metode pembayaran, melakukan checkout, dan menerima kode pickup unik yang digunakan saat pengambilan di merchant.
-
-Keempat adalah riwayat pesanan — user dapat melihat seluruh riwayat transaksi beserta status terkini dari setiap pesanan secara real-time.
+Keempat, keterbatasan waktu pengerjaan karena bersamaan dengan mata kuliah dan tugas lain di semester ini.
 
 ---
 
-## SLIDE 7 — Integrasi dengan Web Platform
-**Durasi: ~45 detik**
+## SLIDE 5 — Target dan Strategi Penyelesaian
+**~60 detik**
 
-Salah satu kekuatan arsitektur EcoEats adalah bagaimana sisi mobile dan web bekerja sebagai satu ekosistem yang koheren, bukan dua sistem terpisah.
+Untuk mengejar target hingga pertemuan 15 atau 16, strategi kami adalah fokus pada flow utama user secara berurutan — selesaikan satu fitur sampai bisa diDemo sebelum lanjut ke berikutnya, daripada mengerjakan banyak fitur setengah-setengah.
 
-Ketika user membuat pesanan di Android, notifikasi langsung masuk ke dashboard merchant di web. Merchant mengkonfirmasi pesanan dari web, dan status pesanan di aplikasi Android user berubah secara real-time. Ketika makanan siap, merchant menandai "siap diambil" dari web, dan user di Android mendapat notifikasi untuk datang ke lokasi.
+Urutan prioritas: autentikasi sudah selesai, berikutnya katalog listing, lalu peta lokasi merchant, kemudian pemesanan dan kode pickup, terakhir riwayat pesanan.
 
-Saat user tiba, mereka menunjukkan kode pickup dari Android, merchant memasukkan kode itu ke web untuk menyelesaikan transaksi. Satu alur yang mulus antara dua platform, satu database, satu sumber kebenaran.
+Untuk mengatasi kendala sinkronisasi API, tim mobile dan backend sudah menyepakati kontrak endpoint melalui dokumentasi Scramble yang tersedia di /docs/api, sehingga tim mobile bisa mulai implementasi bahkan sebelum endpoint benar-benar siap dengan menggunakan mock response terlebih dahulu.
 
----
-
-## SLIDE 8 — Penutup & Demo
-**Durasi: ~40 detik**
-
-Untuk merangkum: EcoEats Android dibangun dengan Kotlin dan Retrofit di atas fondasi API Laravel Sanctum yang sudah solid. Autentikasi end-to-end sudah berjalan, kontrak API sudah terdokumentasi, dan arsitektur yang kami pilih memastikan pengembangan fitur-fitur selanjutnya dapat berjalan dengan terstruktur dan terukur.
-
-Kami percaya bahwa fondasi yang kuat lebih penting dari fitur yang banyak tapi rapuh. Dan fondasi itulah yang sudah kami bangun.
-
-Demikian presentasi dari tim mobile EcoEats. Kami siap menerima pertanyaan.
+Realistically, target yang paling mungkin tercapai hingga pertemuan terakhir adalah katalog listing dan peta sudah bisa berjalan dengan data real. Untuk pemesanan dan riwayat, kami upayakan semaksimal mungkin dalam waktu yang tersisa.
 
 ---
 
-## CATATAN WAKTU (estimasi total)
+## SLIDE 6 — Demo / Preview Hasil
+**~50 detik**
+
+Berikut kami tampilkan hasil yang sudah bisa dilihat saat ini.
+
+[Tunjukkan demo login di perangkat/emulator]
+
+Ini adalah tampilan login aplikasi EcoEats Android. Saat user memasukkan email dan password lalu menekan tombol masuk, aplikasi mengirim request ke backend Laravel. Backend memvalidasi dan mengembalikan token. Token tersimpan dan user masuk ke halaman utama aplikasi.
+
+[Tunjukkan response di Logcat atau tampilan setelah login berhasil]
+
+Ini membuktikan komunikasi Android ke Laravel lewat Retrofit dan Sanctum sudah berjalan dengan benar. Fondasi ini yang akan digunakan oleh seluruh fitur berikutnya.
+
+---
+
+## SLIDE 7 — Penutup
+**~20 detik**
+
+Demikian update progress mobile EcoEats dari kami. Autentikasi sudah selesai, katalog dan fitur lainnya dalam proses pengerjaan aktif. Kami terbuka untuk pertanyaan atau masukan.
+
+---
+
+## ESTIMASI WAKTU
 
 | Slide | Topik | Durasi |
 |---|---|---|
-| 1 | Opening | 45 detik |
-| 2 | Mengapa Mobile | 45 detik |
-| 3 | Tech Stack | 40 detik |
-| 4 | Arsitektur | 50 detik |
-| 5 | Autentikasi (demo) | 60 detik |
-| 6 | Fitur dalam pengembangan | 55 detik |
-| 7 | Integrasi web-mobile | 45 detik |
-| 8 | Penutup | 40 detik |
-| **Total** | | **~8 menit** |
+| 1 | Pembukaan | 20 detik |
+| 2 | Gambaran peran mobile | 40 detik |
+| 3 | Status progress | 90 detik |
+| 4 | Kendala | 70 detik |
+| 5 | Target dan strategi | 60 detik |
+| 6 | Demo/preview | 50 detik |
+| 7 | Penutup | 20 detik |
+| **Total** | | **~5,5 menit + buffer demo** |
 
----
-
-## TIPS PENYAMPAIAN
-
-- Slide 5 adalah inti presentasi — perlambat di sini, tunjukkan demo live jika memungkinkan (buka aplikasi, login, tampilkan token yang diterima di Logcat atau response).
-- Slide 6 sampaikan dengan percaya diri sebagai "roadmap yang sedang berjalan", bukan "yang belum selesai".
-- Jika ada pertanyaan tentang fitur yang belum jadi, jawab: "Fitur tersebut sedang dalam pengembangan aktif dan dijadwalkan selesai pada sprint berikutnya — fondasi API-nya sudah tersedia di backend."
-- Hindari kata "belum" — ganti dengan "sedang dikembangkan" atau "dalam progress".
+> Slide 6 bisa lebih panjang tergantung demo yang ditunjukkan. Total dengan demo aktif sekitar 7–8 menit.
